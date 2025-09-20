@@ -1,0 +1,243 @@
+import z from "zod";
+import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { areaCreateSchema, classCreateSchema, defaultCreateSchema } from "~/lib/schema/admin";
+
+export const settingsRouter = createTRPCRouter({
+    classGetAll: protectedProcedure.query(async ({ ctx }) => {
+        return ctx.db.class.findMany();
+    }),
+    classCreate: protectedProcedure
+        .input(classCreateSchema)
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.class.create({
+                data: {
+                    name: input.name,
+                },
+            });
+        }
+    ),
+    classDelete: protectedProcedure
+        .input(z.number().int())
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.class.delete({
+                where: {
+                    id: input,
+                },
+            });
+        }),
+
+    areaGetAll: protectedProcedure.query(async ({ ctx }) => {
+        return ctx.db.area.findMany({
+            include: {
+                class: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
+            },
+            orderBy: {
+                rank: "asc"
+            }
+        });
+    }),
+    areaCreate: protectedProcedure
+        .input(areaCreateSchema)
+        .mutation(async ({ ctx, input }) => {
+            // get the last area with the highest id and increment by 1
+            const lastArea = await ctx.db.area.findFirst({
+                orderBy: {
+                    rank: "desc"
+                }
+            });
+            const newRank = lastArea ? lastArea.rank + 1 : 1;
+            return ctx.db.area.create({
+                data: {
+                    name: input.name,
+                    classId: parseInt(input.classId),
+                    rank: newRank
+                },
+            });
+        }
+    ),
+    areaDelete: protectedProcedure
+        .input(z.number().int())
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.area.delete({
+                where: {
+                    id: input,
+                },
+            });
+        }),
+    areaMoveUp: protectedProcedure
+        .input(z.number().int())
+        .mutation(async ({ ctx, input }) => {
+            const area = await ctx.db.area.findUnique({
+                where: { id: input }
+            });
+            if (!area) throw new Error("Area not found");
+            const upperArea = await ctx.db.area.findFirst({
+                where: {
+                    rank: {
+                        lt: area.rank
+                    }
+                },
+                orderBy: {
+                    rank: "desc"
+                }
+            });
+            if (!upperArea) throw new Error("已經在最上方");
+            await ctx.db.$transaction([
+                ctx.db.area.update({
+                    where: { id: area.id },
+                    data: { rank: -1 }
+                }),
+                ctx.db.area.update({
+                    where: { id: upperArea.id },
+                    data: { rank: area.rank }
+                }),
+                ctx.db.area.update({
+                    where: { id: area.id },
+                    data: { rank: upperArea.rank }
+                })
+            ]);
+            return true;
+        }),
+    areaMoveDown: protectedProcedure
+        .input(z.number().int())
+        .mutation(async ({ ctx, input }) => {
+            const area = await ctx.db.area.findUnique({
+                where: { id: input }
+            });
+            if (!area) throw new Error("Area not found");
+            const lowerArea = await ctx.db.area.findFirst({
+                where: {
+                    rank: {
+                        gt: area.rank
+                    }
+                },
+                orderBy: {
+                    rank: "asc"
+                }
+            });
+            if (!lowerArea) throw new Error("已經在最下方");
+            await ctx.db.$transaction([
+                ctx.db.area.update({
+                    where: { id: lowerArea.id },
+                    data: { rank: -1 }
+                }),
+                ctx.db.area.update({
+                    where: { id: area.id },
+                    data: { rank: lowerArea.rank }
+                }),
+                ctx.db.area.update({
+                    where: { id: lowerArea.id },
+                    data: { rank: area.rank }
+                })
+            ]);
+            return true;
+        }),
+    defaultGetAll: protectedProcedure.query(async ({ ctx }) => {
+        return ctx.db.default.findMany({
+            orderBy: {
+                rank: "asc"
+            }
+        });
+    }),
+    defaultCreate: protectedProcedure
+        .input(defaultCreateSchema)
+        .mutation(async ({ ctx, input }) => {
+            // get the last area with the highest id and increment by 1
+            const lastDefault = await ctx.db.default.findFirst({
+                orderBy: {
+                    rank: "desc"
+                }
+            });
+            const newRank = lastDefault ? lastDefault.rank + 1 : 1;
+            return ctx.db.default.create({
+                data: {
+                    shorthand: input.shorthand,
+                    text: input.text,
+                    rank: newRank
+                },
+            });
+        }
+    ),
+    defaultDelete: protectedProcedure
+        .input(z.number().int())
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.default.delete({
+                where: {
+                    id: input,
+                },
+            });
+        }),
+    defaultMoveUp: protectedProcedure
+        .input(z.number().int())
+        .mutation(async ({ ctx, input }) => {
+            const def = await ctx.db.default.findUnique({
+                where: { id: input }
+            });
+            if (!def) throw new Error("Default not found");
+            const upperDef = await ctx.db.default.findFirst({
+                where: {
+                    rank: {
+                        lt: def.rank
+                    }
+                },
+                orderBy: {
+                    rank: "desc"
+                }
+            });
+            if (!upperDef) throw new Error("已經在最上方");
+            await ctx.db.$transaction([
+                ctx.db.default.update({
+                    where: { id: def.id },
+                    data: { rank: -1 }
+                }),
+                ctx.db.default.update({
+                    where: { id: upperDef.id },
+                    data: { rank: def.rank }
+                }),
+                ctx.db.default.update({
+                    where: { id: def.id },
+                    data: { rank: upperDef.rank }
+                })
+            ]);
+            return true;
+        }),
+    defaultMoveDown: protectedProcedure
+        .input(z.number().int())
+        .mutation(async ({ ctx, input }) => {
+            const def = await ctx.db.default.findUnique({
+                where: { id: input }
+            });
+            if (!def) throw new Error("Default not found");
+            const lowerDef = await ctx.db.default.findFirst({
+                where: {
+                    rank: {
+                        gt: def.rank
+                    }
+                },
+                orderBy: {
+                    rank: "asc"
+                }
+            });
+            if (!lowerDef) throw new Error("已經在最下方");
+            await ctx.db.$transaction([
+                ctx.db.default.update({
+                    where: { id: lowerDef.id },
+                    data: { rank: -1 }
+                }),
+                ctx.db.default.update({
+                    where: { id: def.id },
+                    data: { rank: lowerDef.rank }
+                }),
+                ctx.db.default.update({
+                    where: { id: lowerDef.id },
+                    data: { rank: def.rank }
+                })
+            ]);
+            return true;
+        }),
+});

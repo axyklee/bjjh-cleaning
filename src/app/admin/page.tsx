@@ -1,0 +1,93 @@
+"use client";
+
+import { format } from 'date-fns';
+import { CalendarIcon, Check, HomeIcon, Printer } from 'lucide-react';
+import { useState } from 'react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion';
+import { Button } from '~/components/ui/button';
+import { Calendar } from '~/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
+import { api } from '~/trpc/react';
+import Notification from './_components/notification';
+import Link from 'next/link';
+import { Skeleton } from '~/components/ui/skeleton';
+import { Badge } from '~/components/ui/badge';
+
+const AdminPage = () => {
+    const [date, setDate] = useState<Date>(new Date());
+    const reports = api.admin.home.getReportsSortedByClass.useQuery({
+        date: date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd")
+    }, {
+        enabled: !!date,
+        refetchOnWindowFocus: false,
+    });
+
+    return (
+        <div>
+            <div className="flex items-center gap-2 mb-3"><HomeIcon className="h-5 w-5" /><h2 className="text-xl font-bold"> 檢視打掃狀況</h2></div>
+            <div className="flex">
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant="outline"
+                            data-empty={!date}
+                            className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal"
+                        >
+                            <CalendarIcon />
+                            {date ? format(date, "yyyy-MM-dd") : <span>請選擇日期</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                        <Calendar mode="single" selected={date} onSelect={setDate} required />
+                    </PopoverContent>
+                </Popover>
+                <Link href={`/printable/${date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd")}`} target="_blank">
+                    <Button className="ml-2">
+                        <Printer />
+                        列印所有通知單
+                    </Button>
+                </Link>
+            </div>
+            {
+                reports.isSuccess ? (
+                    <Accordion type="multiple" className="mt-4 w-full">
+                        {
+                            reports.data?.map((c) => (
+                                <AccordionItem key={c.id} value={c.id.toString()}>
+                                    <AccordionTrigger>
+                                        <div className='font-mono'>
+                                            {c.name}
+                                            {c.reports.length > 0 ? <Badge variant="secondary" className="ml-2 bg-yellow-500">{c.reports.length}</Badge> :
+                                                <Badge variant="secondary" className="ml-2 bg-green-500"><Check /></Badge>}
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="w-full flex items-center justify-center">
+                                        <div className="overflow-x-auto">
+                                            <Notification className={c.name} date={reports.data ? format(date, "yyyy-MM-dd") : ""}
+                                                showDelete={true}
+                                                time={format(c.reports.length > 0 ? new Date(c.reports[0]!.createdAt) : 
+                                                    new Date(), "HH:mm")} reports={c.reports} />
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))
+                        }
+                    </Accordion>
+                ) : <div className="space-y-1">
+                    <div className="w-full space-y-3">
+                        <Skeleton className="w-80 h-6 bg-gray-200 rounded-md"></Skeleton>
+                        <Skeleton className="w-60 h-6 bg-gray-200 rounded-md"></Skeleton>
+                        <Skeleton className="w-70 h-6 bg-gray-200 rounded-md"></Skeleton>
+                        <Skeleton className="w-40 h-6 bg-gray-200 rounded-md"></Skeleton>
+                        <Skeleton className="w-80 h-6 bg-gray-200 rounded-md"></Skeleton>
+                        <Skeleton className="w-90 h-6 bg-gray-200 rounded-md"></Skeleton>
+                        <Skeleton className="w-30 h-6 bg-gray-200 rounded-md"></Skeleton>
+                    </div>
+                </div>
+
+            }
+        </div>
+    )
+};
+
+export default AdminPage;

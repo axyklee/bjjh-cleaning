@@ -14,18 +14,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
-}
-
 // Necessary for Next auth
 model Account {
     id                       String  @id @default(cuid())
@@ -62,7 +50,6 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
-    posts         Post[]
 }
 
 model VerificationToken {
@@ -71,4 +58,59 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Default {
+    id        Int      @id @default(autoincrement())
+
+    shorthand String   @unique
+    text      String   @unique
+
+    rank      Int      @unique // Lower number shows up on top
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Class {
+    id        Int      @id @default(autoincrement())
+    name      String   @unique
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    areas     Area[]
+
+    @@index([name])
+}
+
+model Area {
+    id        Int      @id @default(autoincrement())
+    name      String   @unique
+
+    class     Class    @relation(fields: [classId], references: [id])
+    classId   Int
+    reports   Report[]
+
+    rank      Int      @unique // Lower number means earlier in the list
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([name])
+}
+
+model Report {
+    id           Int      @id @default(autoincrement())
+    date         String   // YYYY-MM-DD
+    text         String
+    evidence     String?  // URL to the picture(s) in JSON array format
+    comment      String?  // Additional comments from the reporter
+    repeated     Int      @default(0) // How many times this report has been reported again
+
+    area         Area     @relation(fields: [areaId], references: [id])
+    areaId       Int
+
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    @@index([text])
 }

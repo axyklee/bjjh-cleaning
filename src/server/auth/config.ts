@@ -1,6 +1,7 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import Google from "next-auth/providers/google";
+import { env } from "~/env";
 
 import { db } from "~/server/db";
 
@@ -32,7 +33,7 @@ declare module "next-auth" {
  */
 export const authConfig = {
   providers: [
-    DiscordProvider,
+    Google({ clientId: process.env.AUTH_GOOGLE_CLIENT_ID!, clientSecret: process.env.AUTH_GOOGLE_CLIENT_SECRET! }),
     /**
      * ...add more providers here.
      *
@@ -45,6 +46,13 @@ export const authConfig = {
   ],
   adapter: PrismaAdapter(db),
   callbacks: {
+    signIn(params) {
+      const { email } = params.user;
+      if (env.ALLOWED_EMAILS.includes(email ?? "")) {
+        return true;
+      }
+      return false;
+    },
     session: ({ session, user }) => ({
       ...session,
       user: {
