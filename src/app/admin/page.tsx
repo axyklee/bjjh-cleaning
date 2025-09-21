@@ -29,7 +29,7 @@ const AdminPage = () => {
     return (
         <div>
             <div className="flex items-center gap-2 mb-3"><HomeIcon className="h-5 w-5" /><h2 className="text-xl font-bold"> 檢視打掃狀況</h2></div>
-            <div className="flex items-center">
+            <div className="flex items-center flex-wrap gap-2">
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
@@ -46,12 +46,12 @@ const AdminPage = () => {
                     </PopoverContent>
                 </Popover>
                 <Link href={`/printable/${date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd")}`} target="_blank">
-                    <Button className="ml-2">
+                    <Button>
                         <Printer />
                         列印所有通知單
                     </Button>
                 </Link>
-                <Button className='ml-2'
+                <Button
                     disabled={!reports.data || reports.data.length === 0 || downloadStatus > 0}
                     onClick={async () => {
                         setDownloadStatus(0);
