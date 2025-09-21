@@ -77,6 +77,7 @@ export default function EvaluatePage() {
                 <Input
                     type="file"
                     accept="image/*"
+                    capture="environment"
                     onChange={async (e) => {
                         form.clearErrors("file");
                         setFileUploadMsg(null);
