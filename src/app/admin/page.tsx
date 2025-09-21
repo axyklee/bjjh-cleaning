@@ -73,7 +73,7 @@ const AdminPage = () => {
                             ))
                         }
                     </Accordion>
-                ) : <div className="space-y-1">
+                ) : <div className="space-y-1 mt-5">
                     <div className="w-full space-y-3">
                         <Skeleton className="w-80 h-6 bg-gray-200 rounded-md"></Skeleton>
                         <Skeleton className="w-60 h-6 bg-gray-200 rounded-md"></Skeleton>

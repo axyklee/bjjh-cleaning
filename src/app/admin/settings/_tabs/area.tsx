@@ -81,7 +81,6 @@ export default function AreaTab() {
                         handleSubmit={async (data: z.infer<typeof areaCreateSchema>, form) => {
                             return await createArea.mutateAsync(data)
                                 .then(() => {
-                                    form.reset();
                                     return {
                                         success: true,
                                         message: "成功加入掃區"

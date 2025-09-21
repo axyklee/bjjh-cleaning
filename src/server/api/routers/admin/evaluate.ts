@@ -52,15 +52,13 @@ export const evaluateRouter = createTRPCRouter({
                 };
             });
         }),
-    getEvidenceUploadUrls: protectedProcedure
+    getEvidenceUploadUrl: protectedProcedure
         .query(async ({ ctx }) => {
-            return await Promise.all(Array.from({ length: 10 }).map(async () => {
-                const path = "evidence/" + Math.random().toString(10).substring(2, 13);
-                return {
-                    path: path,
-                    url: await ctx.s3.presignedPutObject(env.MINIO_BUCKET, path, 60 * 60) // 1 hour
-                }
-            }));
+            const path = "evidence/" + Math.random().toString(10).substring(2, 13);
+            return {
+                path: path,
+                url: await ctx.s3.presignedPutObject(env.MINIO_BUCKET, path, 60 * 60) // 1 hour
+            };
         }),
     getImageUrls: protectedProcedure
         .input(z.object({

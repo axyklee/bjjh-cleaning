@@ -29,7 +29,7 @@ export default function EvaluatePage() {
 
     const [uploadedImagePaths, setUploadedImagePaths] = useState<string[]>([]);
     const [fileUploadMsg, setFileUploadMsg] = useState<string | null>(null);
-    const uploadUrls = api.admin.evaluate.getEvidenceUploadUrls.useQuery();
+    const uploadUrl = api.admin.evaluate.getEvidenceUploadUrl.useQuery();
 
     const uploadedImageUrls = api.admin.evaluate.getImageUrls.useQuery({
         paths: uploadedImagePaths
@@ -72,7 +72,7 @@ export default function EvaluatePage() {
             name: "file",
             label: "證明照片",
             type: "custom",
-            disabled: uploadUrls.isLoading || fileUploadMsg === "上傳檔案中..." || uploadedImagePaths.length >= 10,
+            disabled: uploadUrl.isLoading || fileUploadMsg === "上傳檔案中...",
             custom: (form) => (<div className="m-0">
                 <Input
                     type="file"
@@ -82,7 +82,7 @@ export default function EvaluatePage() {
                         form.clearErrors("file");
                         setFileUploadMsg(null);
 
-                        if (!uploadUrls.data) {
+                        if (!uploadUrl.data) {
                             form.setError("file", {
                                 type: "manual",
                                 message: "Failed to get upload URLs. Please try again later.",
@@ -102,7 +102,7 @@ export default function EvaluatePage() {
                         const file = e.target.files[0];
                         try {
                             await fetch(
-                                uploadUrls.data?.[uploadedImagePaths.length]?.url ?? "",
+                                uploadUrl.data?.url ?? "",
                                 {
                                     method: "PUT",
                                     body: file,
@@ -113,11 +113,13 @@ export default function EvaluatePage() {
                             );
 
                             setUploadedImagePaths((prev) => {
-                                const newPaths = [...prev, uploadUrls.data?.[prev.length]?.path ?? ""];
+                                const newPaths = [...prev, uploadUrl.data?.path ?? ""];
                                 // Update form value with the new paths
                                 form.setValue("evidence", JSON.stringify(newPaths));
                                 return newPaths;
                             });
+
+                            await uploadUrl.refetch();
 
                             await uploadedImageUrls.refetch();
                             setFileUploadMsg("上傳檔案成功");
@@ -159,7 +161,7 @@ export default function EvaluatePage() {
             type: "hidden",
             defaultValue: "[]",
         }
-    ], [selectedArea, repeatedCount, reportText, uploadUrls.data, uploadedImagePaths, uploadedImageUrls.data, fileUploadMsg]);
+    ], [selectedArea, repeatedCount, reportText, uploadUrl.data, uploadedImagePaths, uploadedImageUrls.data, fileUploadMsg]);
 
     if (areas.isLoading) {
         return <div className="space-y-1">
@@ -249,7 +251,7 @@ export default function EvaluatePage() {
                                 setRepeatedCount(1);
                             }}>自訂</Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
                             <DialogHeader>
                                 <DialogTitle>回報狀況</DialogTitle>
                                 <DialogDescription>
@@ -267,7 +269,7 @@ export default function EvaluatePage() {
                                             setFileUploadMsg(null);
                                             await uploadedImageUrls.refetch();
                                             await defaults.refetch();
-                                            await uploadUrls.refetch();
+                                            await uploadUrl.refetch();
                                             return {
                                                 success: true,
                                                 message: "成功回報狀況"
