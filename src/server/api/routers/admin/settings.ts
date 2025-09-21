@@ -1,6 +1,7 @@
 import z from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { areaCreateSchema, classCreateSchema, defaultCreateSchema } from "~/lib/schema/admin";
+import { env } from "~/env";
 
 export const settingsRouter = createTRPCRouter({
     classGetAll: protectedProcedure.query(async ({ ctx }) => {
@@ -9,6 +10,14 @@ export const settingsRouter = createTRPCRouter({
     classCreate: protectedProcedure
         .input(classCreateSchema)
         .mutation(async ({ ctx, input }) => {
+            // CHECK IF THE S3 BUCKET EXISTS :)
+            await ctx.s3.bucketExists(env.MINIO_BUCKET)
+                .then(async (exists) => {
+                    if (!exists) {
+                        await ctx.s3.makeBucket(env.MINIO_BUCKET);
+                    }
+                });
+
             return ctx.db.class.create({
                 data: {
                     name: input.name,
