@@ -29,7 +29,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN \
     if [ -f yarn.lock ]; then SKIP_ENV_VALIDATION=1 yarn build; \
@@ -44,7 +44,7 @@ RUN \
 FROM node:22-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 # ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -58,6 +58,6 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 3000
-ENV PORT 3000
+ENV PORT=3000
 
 CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
