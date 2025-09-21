@@ -44,8 +44,10 @@ export default function ClassTab() {
                                 <TableCell>
                                     <Button variant="destructive" onClick={
                                         async () => {
-                                            await deleteClass.mutateAsync(classItem.id);
-                                            await queryClient.invalidateQueries();
+                                            if (confirm(`確定要刪除班級 ${classItem.name} 嗎？\n請確認該班級下沒有任何掃區, 否則無法刪除`)) {
+                                                await deleteClass.mutateAsync(classItem.id);
+                                                await queryClient.invalidateQueries();
+                                            }
                                         }
                                     }><Trash2 /></Button>
                                 </TableCell>
@@ -59,7 +61,6 @@ export default function ClassTab() {
                         handleSubmit={async (data: z.infer<typeof classCreateSchema>, form) => {
                             return await createClass.mutateAsync(data)
                                 .then(() => {
-                                    form.reset();
                                     return {
                                         success: true,
                                         message: "成功加入班級"

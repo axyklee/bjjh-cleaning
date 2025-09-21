@@ -66,8 +66,10 @@ export default function AreaTab() {
                                     } className="mr-2"><ArrowDown /> 下移</Button>
                                     <Button variant="destructive" onClick={
                                         async () => {
-                                            await deleteArea.mutateAsync(areaItem.id);
-                                            await queryClient.invalidateQueries();
+                                            if (confirm(`確定要刪除掃區 ${areaItem.name} 嗎？`)) {
+                                                await deleteArea.mutateAsync(areaItem.id);
+                                                await queryClient.invalidateQueries();
+                                            }
                                         }
                                     }><Trash2 /></Button>
                                 </TableCell>
