@@ -48,7 +48,7 @@ export const authConfig = {
   callbacks: {
     signIn(params) {
       const { email } = params.user;
-      if (env.ALLOWED_EMAILS.includes(email ?? "")) {
+      if ((env.ALLOWED_EMAILS as string[]).includes(email ?? "")) {
         return true;
       }
       return false;
