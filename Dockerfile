@@ -3,10 +3,6 @@
 FROM node:22-alpine AS deps
 RUN apk add --no-cache libc6-compat openssl
 
-RUN corepack enable
-
-RUN yarn set version berry
-
 WORKDIR /app
 
 # Install Prisma Client - remove if not using Prisma
@@ -18,7 +14,7 @@ COPY prisma ./
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml\* ./
 
 RUN \
-    if [ -f yarn.lock ]; then yarn install --immutable; \
+    if [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
     elif [ -f package-lock.json ]; then npm ci; \
     elif [ -f pnpm-lock.yaml ]; then npm install -g pnpm && pnpm i; \
     else echo "Lockfile not found." && exit 1; \
