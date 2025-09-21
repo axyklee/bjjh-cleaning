@@ -1,23 +1,39 @@
 services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   minio:
     image: minio/minio:latest
-    container_name: minio
     ports:
       - "9000:9000"
-      - "9001:9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-changeme}
+    env_file:
+      - .env
+    restart: unless-stopped
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
 
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   depends_on:
-  #     - minio
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - minio
+    env_file:
+      - .env
+    restart: unless-stopped
 
 volumes:
-  minio_data:                                                                                                                                                    
+  minio_data:
+  pgdata:

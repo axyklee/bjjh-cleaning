@@ -2,7 +2,7 @@ import z from "zod";
 import { env } from "~/env";
 import { evaluateReportSchema } from "~/lib/schema/admin";
 import { getLastWorkday } from "~/lib/utils";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const evaluateRouter = createTRPCRouter({
     defaultGetAll: protectedProcedure
