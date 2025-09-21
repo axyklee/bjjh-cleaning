@@ -1,5 +1,6 @@
 import z from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { env } from "~/env";
 
 export const adminHomeRouter = createTRPCRouter({
     getReportsSortedByClass: protectedProcedure
@@ -42,5 +43,37 @@ export const adminHomeRouter = createTRPCRouter({
                     id: input.reportId
                 }
             });
+        }),
+    downloadReports: protectedProcedure
+        .input(z.object({
+            date: z.string().min(1, "請輸入日期").regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式錯誤，請使用 YYYY-MM-DD"),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const reports = await ctx.db.report.findMany({
+                where: {
+                    date: input.date
+                },
+                include: {
+                    area: {
+                        include: {
+                            class: true
+                        }
+                    }
+                },
+                orderBy: [
+                    { area: { class: { id: "asc" } } },
+                    { area: { rank: "asc" } }
+                ]
+            });
+            return await Promise.all(reports.map(async (r) => {
+                const evidence = await Promise.all((JSON.parse(r.evidence ?? "[]") as string[]).map(async (path) => {
+                    const imgPath = await ctx.s3.presignedGetObject(env.MINIO_BUCKET, path, 24 * 60 * 60);
+                    return imgPath;
+                }));
+                return {
+                    ...r,
+                    evidence
+                };
+            }))
         })
 });

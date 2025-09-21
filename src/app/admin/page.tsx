@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from 'date-fns';
-import { CalendarIcon, Check, HomeIcon, Printer } from 'lucide-react';
+import { CalendarIcon, Check, Download, HomeIcon, Printer } from 'lucide-react';
 import { useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion';
 import { Button } from '~/components/ui/button';
@@ -12,6 +12,8 @@ import Notification from './_components/notification';
 import Link from 'next/link';
 import { Skeleton } from '~/components/ui/skeleton';
 import { Badge } from '~/components/ui/badge';
+import JSZip from 'jszip';
+import { Progress } from '~/components/ui/progress';
 
 const AdminPage = () => {
     const [date, setDate] = useState<Date>(new Date());
@@ -21,11 +23,13 @@ const AdminPage = () => {
         enabled: !!date,
         refetchOnWindowFocus: false,
     });
+    const downloadReports = api.admin.home.downloadReports.useMutation();
+    const [downloadStatus, setDownloadStatus] = useState(0);
 
     return (
         <div>
             <div className="flex items-center gap-2 mb-3"><HomeIcon className="h-5 w-5" /><h2 className="text-xl font-bold"> 檢視打掃狀況</h2></div>
-            <div className="flex">
+            <div className="flex items-center">
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
@@ -47,6 +51,57 @@ const AdminPage = () => {
                         列印所有通知單
                     </Button>
                 </Link>
+                <Button className='ml-2'
+                    disabled={!reports.data || reports.data.length === 0 || downloadStatus > 0}
+                    onClick={async () => {
+                        setDownloadStatus(0);
+                        const data = await downloadReports.mutateAsync({ date: date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd") });
+                        const zip = new JSZip();
+
+                        const evidenceCount = data.map(c => c.evidence.length).reduce((a, b) => a + b, 0);
+                        let processedCount = 0;
+
+                        await Promise.all(data.map(async (report) => {
+                            const folder = zip.folder(report.area.class.name) ?? zip;
+                            const areaName = report.area.name;
+                            const content =  `地點: ${areaName}
+                                            \n日期: ${report.date}
+                                            \n時間: ${format(new Date(report.createdAt), "HH:mm")}
+                                            \n狀況: ${report.text}
+                                            \n備註: ${report.comment ?? "無"}\n`;
+                            const fileName = `${areaName}_${report.text}_${report.id}.txt`;
+                            folder.file(fileName, content);
+
+                            await Promise.all(report.evidence.map(async (url, index) => {
+                                const imgData = await fetch(url).then(res => res.blob());
+                                const imgFileName = `${areaName}_${report.text}_${report.id}_img${index + 1}.png`;
+                                folder.file(imgFileName, imgData);
+
+                                processedCount += 1;
+                                setDownloadStatus(Math.floor((1.0 * processedCount / evidenceCount) * 100));
+                            }));
+
+                        }));
+                        const blob = await zip.generateAsync({ type: "blob" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `reports_${date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd")}.zip`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        setDownloadStatus(0);
+                    }}>
+                    {
+                        downloadStatus > 0 ? "下載中..." : <>
+                            <Download />下載今日資料
+                        </>
+                    }
+                </Button>
+                {
+                    downloadStatus > 0 && <Progress className="ml-2 w-[200px]" value={downloadStatus ? 100 : 0} />
+                }
             </div>
             {
                 reports.isSuccess ? (
@@ -65,7 +120,7 @@ const AdminPage = () => {
                                         <div className="overflow-x-auto">
                                             <Notification className={c.name} date={reports.data ? format(date, "yyyy-MM-dd") : ""}
                                                 showDelete={true}
-                                                time={format(c.reports.length > 0 ? new Date(c.reports[0]!.createdAt) : 
+                                                time={format(c.reports.length > 0 ? new Date(c.reports[0]!.createdAt) :
                                                     new Date(), "HH:mm")} reports={c.reports} />
                                         </div>
                                     </AccordionContent>
