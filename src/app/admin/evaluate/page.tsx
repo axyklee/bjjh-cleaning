@@ -228,13 +228,13 @@ export default function EvaluatePage() {
                             <DialogTrigger asChild key={defaultItem.id}>
                                 <Button className={`${defaultItem.reportedToday ? "bg-red-600 text-white hover:bg-red-700" :
                                     defaultItem.repeatedToday > 1 ? "bg-yellow-600 text-white hover:bg-yellow-700" : ""
-                                    } w-25 h-25 text-2xl`}
+                                    } w-26 h-26 text-2xl`}
                                     onClick={() => {
                                         setReportText(defaultItem.text);
                                         setRepeatedCount(defaultItem.repeatedToday > 1 ? defaultItem.repeatedToday : 1);
                                     }}>
                                     <div>
-                                        <p>{defaultItem.shorthand}</p>
+                                        <p className="text-wrap">{defaultItem.shorthand}</p>
                                         <p className="text-sm mb-0">
                                             {defaultItem.repeatedToday > 1 ? `(連續${defaultItem.repeatedToday}日)` : ""}
                                         </p>
