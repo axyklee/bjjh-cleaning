@@ -55,8 +55,8 @@ export default function Notification(props: {
     }
 
     return <Dialog>
-        <div className="w-[21cm] relative">
-            <QRCodeSVG value={`${getBaseUrl()}/view/${date}/${className}`} size={48} className="absolute right-0 top-0" />
+        <div className="w-[19cm] relative">
+            <QRCodeSVG value={`${getBaseUrl()}/view/${date}/${className}`} size={46} className="absolute right-0 top-0" />
             <table className="font-mono">
                 <tbody>
                     <tr>
@@ -148,17 +148,17 @@ export default function Notification(props: {
                 table {
                     border-collapse: collapse;
                     margin: auto;
-                    width: 21cm;
-                    height: 13.5cm;
+                    width: 19cm;
+                    height: 12.8cm;
                     table-layout: fixed;
                     overflow: clip;
                     white-space: nowrap;
                 }
                 td, th {
                     border: 1px solid black;
-                    padding: 8px;
+                    padding: 0 5px;
                     text-align: center;
-                    height: 40px;
+                    height: 0.7cm;
                     width: 16.66%;
                     font-size: 16px;
                 }
@@ -174,12 +174,12 @@ export default function Notification(props: {
                 .footer {
                     border: none;
                     text-align: right;
-                    padding-top: 10px;
+                    padding-top: 0;
                 }
                 .footer-left {
                     border: none;
                     text-align: left;
-                    padding-top: 10px;
+                    padding-top: 0;
                 }
             `}</style>
                 </tbody>
