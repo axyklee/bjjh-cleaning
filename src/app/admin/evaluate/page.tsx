@@ -12,6 +12,7 @@ import GeneratedForm from "~/_helper/generatedForm";
 import { evaluateReportSchema } from "~/lib/schema/admin";
 import { Input } from "~/components/ui/input";
 import type z from "zod";
+import { Progress } from "~/components/ui/progress";
 
 export default function EvaluatePage() {
     const areas = api.admin.settings.areaGetAll.useQuery(undefined, {
@@ -180,7 +181,7 @@ export default function EvaluatePage() {
     return (
         <div>
             <div className="flex items-center gap-2 mb-3"><SearchCheck className="h-5 w-5" /><h2 className="text-xl font-bold"> 評比</h2></div>
-
+            <Progress value={areas.data && selectedArea ? (areas.data.findIndex(a => a.id.toString() === selectedArea) + 1) / areas.data.length * 100 : 0} className="mb-5" />
             <div className="flex items-center mb-5">
                 <Button className="w-15 h-15" disabled={areas.data?.findIndex(a => a.id.toString() === selectedArea) === 0 || areas.data?.findIndex(a => a.id.toString() === selectedArea) === undefined}
                     onClick={() => {
