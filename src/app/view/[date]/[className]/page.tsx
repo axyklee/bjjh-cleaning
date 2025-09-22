@@ -30,7 +30,7 @@ export default function Page() {
                         records.data.map((r) => (
                             <div key={r.id} className="p-4 border border-gray-200 rounded-md">
                                 <h3 className="text-lg font-semibold mb-2 font-mono">
-                                    {r.area.name} {r.repeated > 0 ? ` 連續 ${r.repeated} 日` : ""} {r.text}{r.comment ? ` (${r.comment})` : ""}
+                                    {r.area.name} {r.repeated > 1 ? ` 連續 ${r.repeated} 日` : ""} {r.text}{r.comment ? ` (${r.comment})` : ""}
                                 </h3>
                                 <p className="text-sm text-gray-500 mb-4">回報時間: {new Date(r.createdAt).toLocaleString()}</p>
                                 {r.evidence ? (
