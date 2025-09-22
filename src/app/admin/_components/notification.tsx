@@ -69,7 +69,11 @@ export default function Notification(props: {
                         <td colSpan={2}>{className}</td>
                         <td colSpan={2}>檢查日期</td>
                         <td colSpan={2}>{date}</td>
-                        <td colSpan={2}>檢查時間</td>
+                        <td colSpan={2}>
+                            {
+                                reports.length > 0 ? "檢查時間" : "列印時間"
+                            }
+                        </td>
                         <td colSpan={2}>{time}</td>
                     </tr>
                     <tr>
@@ -90,7 +94,7 @@ export default function Notification(props: {
                                     setSelectedEvidencePaths((r.evidence ? JSON.parse(r.evidence) : []) as string[]);
                                 }} asChild>
                                     <td className="text-start! border-x-0! cursor-pointer" colSpan={2}>
-                                        {r.repeated > 0 ? ` 連續 ${r.repeated} 日` : ""}
+                                        {r.repeated > 1 ? ` 連續 ${r.repeated} 日` : ""}
                                     </td>
                                 </DialogTrigger>
                                 <DialogTrigger onClick={() => {
