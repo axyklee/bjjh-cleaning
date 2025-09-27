@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft, ArrowRight, SearchCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarIcon, SearchCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
@@ -13,6 +13,10 @@ import { evaluateReportSchema } from "~/lib/schema/admin";
 import { Input } from "~/components/ui/input";
 import type z from "zod";
 import { Progress } from "~/components/ui/progress";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import { Calendar } from "~/components/ui/calendar";
+import { getLastWorkday } from "~/lib/utils";
+import { format } from "date-fns";
 
 export default function EvaluatePage() {
     const areas = api.admin.settings.areaGetAll.useQuery(undefined, {
@@ -45,8 +49,16 @@ export default function EvaluatePage() {
         }
     }, [areas.data]);
 
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    const lastWorkday = getLastWorkday(`${yyyy}-${mm}-${dd}`);
+    const [standardDate, setStandardDate] = useState<string>(lastWorkday);
+
     const defaults = api.admin.evaluate.defaultGetAll.useQuery({
-        areaId: parseInt(selectedArea ?? "0")
+        areaId: parseInt(selectedArea ?? "0"),
+        standardDate: standardDate
     });
 
     const formGen = useMemo<zGenForm>(() => [
@@ -214,8 +226,30 @@ export default function EvaluatePage() {
                     }}><ArrowRight /></Button>
             </div>
 
+            <Popover>
+                <PopoverTrigger asChild>
+                    <div>
+                        <p>上一個檢查打掃日</p>
+                        <Button
+                            variant="outline"
+                            data-empty={!standardDate}
+                            className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal"
+                        >
+                            <CalendarIcon />
+                            {standardDate ? standardDate : <span>上一個檢查打掃日</span>}
+                        </Button>
+                    </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                    <Calendar mode="single" selected={new Date(standardDate)} onSelect={async (date) => {
+                        setStandardDate(format(date, "yyyy-MM-dd"));
+                        await defaults.refetch();
+                    }} required />
+                </PopoverContent>
+            </Popover>
+
             {defaults.isSuccess ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mt-5">
                     <Dialog onOpenChange={async (open) => {
                         if (!open) {
                             setReportText("");

@@ -58,7 +58,7 @@ export default function ClassTab() {
                 <div className="mt-3">
                     <GeneratedForm schema={classCreateSchema}
                         formGen={formGen}
-                        handleSubmit={async (data: z.infer<typeof classCreateSchema>, form) => {
+                        handleSubmit={async (data: z.infer<typeof classCreateSchema>) => {
                             return await createClass.mutateAsync(data)
                                 .then(() => {
                                     return {

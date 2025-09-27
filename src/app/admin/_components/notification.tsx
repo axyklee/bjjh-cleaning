@@ -6,10 +6,8 @@ import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Skeleton } from "~/components/ui/skeleton";
 import { api } from "~/trpc/react";
 import { QRCodeSVG } from 'qrcode.react';
-import { Button } from "~/components/ui/button";
 import { Trash } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { getQueryKey } from "@trpc/react-query";
 
 export default function Notification(props: {
     className: string;

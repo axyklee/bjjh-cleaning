@@ -1,13 +1,13 @@
 import z from "zod";
 import { env } from "~/env";
 import { evaluateReportSchema } from "~/lib/schema/admin";
-import { getLastWorkday } from "~/lib/utils";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const evaluateRouter = createTRPCRouter({
     defaultGetAll: protectedProcedure
         .input(z.object({
-            areaId: z.number()
+            areaId: z.number(),
+            standardDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format, expected YYYY-MM-DD")
         }))
         .query(async ({ ctx, input }) => {
             const defaults = await ctx.db.default.findMany({
@@ -21,10 +21,9 @@ export const evaluateRouter = createTRPCRouter({
             const mm = String(today.getMonth() + 1).padStart(2, "0");
             const dd = String(today.getDate()).padStart(2, "0");
 
-            const lastWorkday = getLastWorkday(`${yyyy}-${mm}-${dd}`);
             const reportsLastWorkday = await ctx.db.report.findMany({
                 where: {
-                    date: lastWorkday,
+                    date: input.standardDate,
                     areaId: input.areaId
                 }
             });

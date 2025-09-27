@@ -78,7 +78,7 @@ export default function DefaultTab() {
                 <div className="mt-3">
                     <GeneratedForm schema={defaultCreateSchema}
                         formGen={formGen}
-                        handleSubmit={async (data: z.infer<typeof defaultCreateSchema>, form) => {
+                        handleSubmit={async (data: z.infer<typeof defaultCreateSchema>) => {
                             return await createDefault.mutateAsync(data)
                                 .then(() => {
                                     return {

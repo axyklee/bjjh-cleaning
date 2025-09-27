@@ -80,7 +80,7 @@ export default function AreaTab() {
                 <div className="mt-3">
                     <GeneratedForm schema={areaCreateSchema}
                         formGen={formGen}
-                        handleSubmit={async (data: z.infer<typeof areaCreateSchema>, form) => {
+                        handleSubmit={async (data: z.infer<typeof areaCreateSchema>) => {
                             return await createArea.mutateAsync(data)
                                 .then(() => {
                                     return {
