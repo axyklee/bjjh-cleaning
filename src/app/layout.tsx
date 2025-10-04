@@ -22,6 +22,7 @@ export default function RootLayout({
     <html lang="en" className={`${geist.variable}`}>
       <body className="bg-neutral-50">
         <TRPCReactProvider>{children}</TRPCReactProvider>
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="de77df28-58bf-43e8-aada-e56af5ff7e44"></script>
       </body>
     </html>
   );
