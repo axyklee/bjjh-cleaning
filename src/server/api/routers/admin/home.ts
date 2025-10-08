@@ -11,6 +11,10 @@ export const adminHomeRouter = createTRPCRouter({
             const classes = await ctx.db.class.findMany({
                 orderBy: {
                     id: "asc"
+                },
+                select: {
+                    id: true,
+                    name: true
                 }
             });
             const ret =
@@ -22,8 +26,18 @@ export const adminHomeRouter = createTRPCRouter({
                                 classId: c.id
                             }
                         },
-                        include: {
-                            area: true
+                        select: {
+                            area: {
+                                select: {
+                                    name: true
+                                }
+                            },
+                            id: true,
+                            text: true,
+                            repeated: true,
+                            evidence: true,
+                            comment: true,
+                            createdAt: true
                         }
                     });
                     return {
@@ -53,12 +67,25 @@ export const adminHomeRouter = createTRPCRouter({
                 where: {
                     date: input.date
                 },
-                include: {
+                select: {
                     area: {
-                        include: {
-                            class: true
+                        select: {
+                            class: {
+                                select: {
+                                    id: true,
+                                    name: true
+                                }
+                            },
+                            rank: true,
+                            name: true
                         }
-                    }
+                    },
+                    evidence: true,
+                    date: true,
+                    createdAt: true,
+                    text: true,
+                    comment: true,
+                    id: true
                 },
                 orderBy: [
                     { area: { class: { id: "asc" } } },

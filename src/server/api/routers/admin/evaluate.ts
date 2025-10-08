@@ -13,6 +13,11 @@ export const evaluateRouter = createTRPCRouter({
             const defaults = await ctx.db.default.findMany({
                 orderBy: {
                     rank: "asc"
+                },
+                select: {
+                    id: true,
+                    text: true,
+                    shorthand: true
                 }
             });
             const today = new Date();
@@ -71,7 +76,7 @@ export const evaluateRouter = createTRPCRouter({
     submitReport: protectedProcedure
         .input(evaluateReportSchema)
         .mutation(async ({ ctx, input }) => {
-            const report = await ctx.db.report.create({
+            await ctx.db.report.create({
                 data: {
                     date: input.date,
                     text: input.text,
@@ -81,6 +86,5 @@ export const evaluateRouter = createTRPCRouter({
                     comment: input.comment
                 }
             });
-            return report;
         }),
 });

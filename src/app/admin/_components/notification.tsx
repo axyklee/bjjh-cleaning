@@ -17,18 +17,9 @@ export default function Notification(props: {
     reports: ({
         area: {
             name: string;
-            id: number;
-            classId: number;
-            createdAt: Date;
-            updatedAt: Date;
-            rank: number;
         },
-        date: string;
         id: number;
         text: string;
-        createdAt: Date;
-        updatedAt: Date;
-        areaId: number;
         repeated: number;
         evidence: string | null;
         comment: string | null;

@@ -19,8 +19,18 @@ export const viewHomeRouter = createTRPCRouter({
                         }
                     }
                 },
-                include: {
-                    area: true
+                select: {
+                    id: true,
+                    evidence: true,
+                    area: {
+                        select: {
+                            name: true
+                        }
+                    },
+                    repeated: true,
+                    text: true,
+                    comment: true,
+                    createdAt: true
                 }
             });
             return await Promise.all(records.map(async r => {
