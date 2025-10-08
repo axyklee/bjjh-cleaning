@@ -1,6 +1,6 @@
 import z from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
-import { areaCreateSchema, classCreateSchema, defaultCreateSchema } from "~/lib/schema/admin";
+import { accountCreateSchema, areaCreateSchema, classCreateSchema, defaultCreateSchema } from "~/lib/schema/admin";
 import { env } from "~/env";
 
 export const settingsRouter = createTRPCRouter({
@@ -249,4 +249,31 @@ export const settingsRouter = createTRPCRouter({
             ]);
             return true;
         }),
+    accountGetAll: protectedProcedure
+        .query(async ({ ctx }) => {
+            return ctx.db.user.findMany({
+                select: {
+                    id: true,
+                    email: true,
+                }
+            });
+        }),
+    accountCreate: protectedProcedure
+        .input(accountCreateSchema)
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.user.create({
+                data: {
+                    email: input.email,
+                }
+            });
+        }),
+    accountDelete: protectedProcedure
+        .input(z.string())
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.user.delete({
+                where: {
+                    id: input,
+                }
+            });
+        })
 });

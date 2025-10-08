@@ -33,7 +33,11 @@ declare module "next-auth" {
  */
 export const authConfig = {
   providers: [
-    Google({ clientId: process.env.AUTH_GOOGLE_CLIENT_ID!, clientSecret: process.env.AUTH_GOOGLE_CLIENT_SECRET! }),
+    Google({
+      clientId: env.AUTH_GOOGLE_CLIENT_ID,
+      clientSecret: env.AUTH_GOOGLE_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
+    }),
     /**
      * ...add more providers here.
      *
@@ -46,9 +50,14 @@ export const authConfig = {
   ],
   adapter: PrismaAdapter(db),
   callbacks: {
-    signIn(params) {
+    async signIn(params) {
       const { email } = params.user;
-      if ((env.ALLOWED_EMAILS as string[]).includes(email ?? "")) {
+      if (await db.user.findFirst({ where: { email } })) {
+        // User already exists, allow sign in
+        return true;
+      }
+      if (await db.user.count() === 0) {
+        // If no users exist, allow sign in to create the first admin user
         return true;
       }
       return false;

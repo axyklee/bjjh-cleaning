@@ -14,6 +14,10 @@ export const defaultCreateSchema = z.object({
     text: z.string().min(1, "請輸入完整訊息"),
 })
 
+export const accountCreateSchema = z.object({
+    email: z.email("請輸入有效的電子郵件地址"),
+});
+
 export const evaluateReportSchema = z.object({
     date: z.string().min(1, "請輸入日期").regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式錯誤，請使用 YYYY-MM-DD"),
     text: z.string().min(1, "請輸入未清潔狀況"),

@@ -22,7 +22,6 @@ export const env = createEnv({
     MINIO_SECRET_KEY: z.string(),
     MINIO_BUCKET: z.string(),
     MINIO_USE_SSL: z.boolean().default(false),
-    ALLOWED_EMAILS: z.string().transform((val) => JSON.parse(val)),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -54,7 +53,6 @@ export const env = createEnv({
     MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
     MINIO_BUCKET: process.env.MINIO_BUCKET,
     MINIO_USE_SSL: process.env.MINIO_USE_SSL === "true",
-    ALLOWED_EMAILS: process.env.ALLOWED_EMAILS,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**
