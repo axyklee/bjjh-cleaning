@@ -121,7 +121,7 @@ export default function Notification(props: {
                         <td colSpan={8} className="footer-left">敬會導師協助督導 / 歡迎使用上方 QR Code 查看照片</td>
                         <td colSpan={4} className="footer">督導人員: 學務處</td>
                     </tr>
-                    <DialogContent className="w-[90vw] max-w-5xl">
+                    <DialogContent className="w-[90vw] max-w-5xl overflow-y-scroll max-h-screen">
                         <DialogTitle>督導照片</DialogTitle>
                         <div className="space-y-4">
                             {imgUrls.isSuccess && imgUrls.data.length > 0 ? <div className="grid grid-cols-2 gap-2">

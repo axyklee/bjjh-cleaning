@@ -286,7 +286,7 @@ export default function EvaluatePage() {
                                 setRepeatedCount(1);
                             }}>自訂</Button>
                         </DialogTrigger>
-                        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+                        <DialogContent className="overflow-y-scroll max-h-screen" onOpenAutoFocus={(e) => e.preventDefault()}>
                             <DialogHeader>
                                 <DialogTitle>回報狀況</DialogTitle>
                                 <DialogDescription>
