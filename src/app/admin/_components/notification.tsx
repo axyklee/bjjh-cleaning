@@ -46,7 +46,7 @@ export default function Notification(props: {
     return <Dialog>
         <div className="w-[19cm] relative">
             <QRCodeSVG value={`${getBaseUrl()}/view/${date}/${className}`} size={46} className="absolute right-0 top-0" />
-            <table className="font-mono">
+            <table className="font-mono notification">
                 <tbody>
                     <tr>
                         <td colSpan={12} className="title">
@@ -138,7 +138,7 @@ export default function Notification(props: {
                         </div>
                     </DialogContent>
                     <style>{`
-                table {
+                table.notification {
                     border-collapse: collapse;
                     margin: auto;
                     width: 19cm;
@@ -147,7 +147,7 @@ export default function Notification(props: {
                     overflow: clip;
                     white-space: nowrap;
                 }
-                td, th {
+                table.notification td, table.notification th {
                     border: 1px solid black;
                     padding: 0 5px;
                     text-align: center;
@@ -155,21 +155,21 @@ export default function Notification(props: {
                     width: 16.66%;
                     font-size: 16px;
                 }
-                .title {
+                table.notification td.title {
                     font-size: 22px;
                     font-weight: bold;
                     border: none;
                 }
-                .section-title {
+                table.notification td.section-title {
                     background-color: #dcdcdc;
                     font-weight: bold;
                 }
-                .footer {
+                table.notification td.footer {
                     border: none;
                     text-align: right;
                     padding-top: 0;
                 }
-                .footer-left {
+                table.notification td.footer-left {
                     border: none;
                     text-align: left;
                     padding-top: 0;
