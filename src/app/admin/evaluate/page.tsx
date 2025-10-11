@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover
 import { Calendar } from "~/components/ui/calendar";
 import { getLastWorkday } from "~/lib/utils";
 import { format } from "date-fns";
+import imageCompression from 'browser-image-compression';
 
 export default function EvaluatePage() {
     const areas = api.admin.settings.areaGetAll.useQuery(undefined, {
@@ -102,7 +103,7 @@ export default function EvaluatePage() {
                             });
                             return;
                         }
-                        if (!e.target.files || e.target.files.length === 0) {
+                        if (!e.target.files || e.target.files.length === 0 || e.target.files[0] === undefined) {
                             form.setError("file", {
                                 type: "manual",
                                 message: "請選擇要上傳的檔案",
@@ -113,12 +114,20 @@ export default function EvaluatePage() {
                         setFileUploadMsg("上傳檔案中...");
 
                         const file = e.target.files[0];
+
+                        const options = {
+                            maxSizeMB: 1,
+                            maxWidthOrHeight: 1920,
+                            useWebWorker: true,
+                        }
                         try {
+                            const compressedFile = await imageCompression(file, options);
+
                             await fetch(
                                 uploadUrl.data?.url ?? "",
                                 {
                                     method: "PUT",
-                                    body: file,
+                                    body: compressedFile,
                                     headers: {
                                         "Content-Type": "image/*",
                                     },
