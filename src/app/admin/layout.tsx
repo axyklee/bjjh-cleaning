@@ -3,7 +3,7 @@ import { auth } from "~/server/auth";
 import Header from "../_components/header";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from "~/components/ui/navigation-menu";
 import Link from "next/link";
-import { FilePen, Home, Settings } from "lucide-react";
+import { ChartBar, FilePen, Home, Settings } from "lucide-react";
 
 export default async function AdminLayout({
   children,
@@ -30,6 +30,13 @@ export default async function AdminLayout({
                             <Link href="/admin/settings">
                                 <div className='flex items-center gap-2'>
                                     <Settings className="w-5" /> 後端設定
+                                </div>
+                            </Link>
+                        </NavigationMenuLink>
+                        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                            <Link href="/admin/analytics">
+                                <div className='flex items-center gap-2'>
+                                    <ChartBar className="w-5" /> 評比分析
                                 </div>
                             </Link>
                         </NavigationMenuLink>

@@ -130,3 +130,28 @@
     cursor: pointer;
   }
 }
+
+@layer base {
+  :root {
+    --chart-1:  oklch(0.646 0.222 41.116);
+    --chart-2:  oklch(0.6 0.118 184.704);
+    --chart-3:  oklch(0.398 0.07 227.392);
+    --chart-4:  oklch(0.828 0.189 84.429);
+    --chart-5:  oklch(0.769 0.188 70.08);
+    --chart-6:  oklch(0.72 0.21 23.0);
+    --chart-7:  oklch(0.57 0.16 350.0);
+    --chart-8:  oklch(0.82 0.19 130.0);
+    --chart-9:  oklch(0.68 0.15 160.0);
+    --chart-10: oklch(0.62 0.21 200.0);
+    --chart-11: oklch(0.52 0.18 250.0);
+    --chart-12: oklch(0.75 0.22 280.0);
+    --chart-13: oklch(0.8 0.18 320.0);
+    --chart-14: oklch(0.7 0.16 10.0);
+    --chart-15: oklch(0.85 0.19 60.0);
+    --chart-16: oklch(0.78 0.16 100.0);
+    --chart-17: oklch(0.65 0.18 140.0);
+    --chart-18: oklch(0.55 0.14 190.0);
+    --chart-19: oklch(0.48 0.17 240.0);
+    --chart-20: oklch(0.68 0.21 300.0);
+  }
+}

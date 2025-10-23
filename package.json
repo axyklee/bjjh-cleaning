@@ -1,6 +1,6 @@
 {
   "name": "bjjh-cleaning",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -31,6 +31,7 @@
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
@@ -45,7 +46,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.2",
     "jszip": "^3.10.1",
-    "lucide-react": "^0.544.0",
+    "lucide-react": "^0.546.0",
     "minio": "^8.0.6",
     "next": "^15.2.3",
     "next-auth": "5.0.0-beta.25",

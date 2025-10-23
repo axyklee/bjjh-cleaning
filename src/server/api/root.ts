@@ -3,6 +3,7 @@ import { settingsRouter } from "./routers/admin/settings";
 import { evaluateRouter } from "./routers/admin/evaluate";
 import { adminHomeRouter } from "./routers/admin/home";
 import { viewHomeRouter } from "./routers/view/home";
+import { analyticsRouter } from "./routers/admin/analytics";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
     settings: settingsRouter,
     evaluate: evaluateRouter,
     home: adminHomeRouter,
+    analytics: analyticsRouter
   },
   view: {
     home: viewHomeRouter
