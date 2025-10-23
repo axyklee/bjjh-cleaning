@@ -44,6 +44,7 @@ export default function ByClass() {
         loading={!chartConfigCompleted || chartData.isLoading}
         dateRange={dateRange}
         setDateRange={setDateRange}
+        showXLabel={true}
     />
 
 }

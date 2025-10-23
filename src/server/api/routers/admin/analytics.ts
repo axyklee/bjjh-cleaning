@@ -4,8 +4,8 @@ import type { PrismaClient } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 const getDefaults = async (db: PrismaClient<{
-        log: ("query" | "warn" | "error")[];
-    }, "query" | "warn" | "error", DefaultArgs>) => {
+    log: ("query" | "warn" | "error")[];
+}, "query" | "warn" | "error", DefaultArgs>) => {
     return await db.default.findMany({
         select: {
             id: true,
@@ -14,6 +14,16 @@ const getDefaults = async (db: PrismaClient<{
         }
     })
 }
+
+const countReports = (i: {
+    key: string;
+    [key: number]: string | number;
+}) => Object.entries(i).reduce((sum, [key, value]) => {
+    if (key !== "key" && typeof value === "number") {
+        return sum + value;
+    }
+    return sum;
+}, 0);
 
 export const analyticsRouter = createTRPCRouter({
     getDefaultsAsArray: protectedProcedure
@@ -63,6 +73,9 @@ export const analyticsRouter = createTRPCRouter({
                     areaEntry[reportDefaultId] = 1;
                 }
             })
+            areaMap.sort((a, b) => {
+                return countReports(b) - countReports(a);
+            });
             return areaMap;
         }),
     getReportsInRangeByClass: protectedProcedure
@@ -111,6 +124,9 @@ export const analyticsRouter = createTRPCRouter({
                     classEntry[reportDefaultId] = 1;
                 }
             })
+            classMap.sort((a, b) => {
+                return countReports(b) - countReports(a);
+            });
             return classMap;
         }),
 })

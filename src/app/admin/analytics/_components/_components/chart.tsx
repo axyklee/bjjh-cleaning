@@ -18,8 +18,9 @@ export default function Chart(props: {
         startDate: string;
         endDate: string;
     }>>;
+    showXLabel: boolean;
 }) {
-    const { title, chartData, chartConfig, loading, dateRange, setDateRange } = props;
+    const { title, chartData, chartConfig, loading, dateRange, setDateRange, showXLabel } = props;
 
     useEffect(() => {
         const today = new Date();
@@ -86,6 +87,7 @@ export default function Chart(props: {
                         tickLine={false}
                         tickMargin={10}
                         axisLine={false}
+                        hide={!showXLabel}
                     />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <ChartLegend content={<ChartLegendContent />} />

@@ -45,6 +45,7 @@ export default function ByArea() {
         loading={!chartConfigCompleted || chartData.isLoading}
         dateRange={dateRange}
         setDateRange={setDateRange}
+        showXLabel={false}
     />
 
 }
