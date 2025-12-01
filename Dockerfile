@@ -60,4 +60,4 @@ COPY --from=builder /app/prisma ./prisma
 EXPOSE 3000
 ENV PORT=3000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+CMD ["sh", "-c", "npx prisma@^6.5.0 migrate deploy && node server.js"]
