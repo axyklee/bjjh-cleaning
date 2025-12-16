@@ -1476,10 +1476,10 @@
   resolved "https://registry.yarnpkg.com/@trpc/react-query/-/react-query-11.5.1.tgz#52bfbc307aa809b3db02a28ca74e2619677ac468"
   integrity sha512-Y+e0Lp7na1LAjoYqtHVjxpfayOuvvnuchS723b4dsI/V0h3irBuI+bx38S3m7RgaIh/L1av1SldFrKIauk+r/A==
 
-"@trpc/server@^11.0.0":
-  version "11.5.1"
-  resolved "https://registry.yarnpkg.com/@trpc/server/-/server-11.5.1.tgz#c797e621b7ff5906866e875acdf4da5870f19d90"
-  integrity sha512-KIDzHRS5m8U1ncPwjgtOtPWK9lNO0kYL7b+lnvKXRqowSAQIEC/z6y7g/dkt4Aqv3DKI/STLydt2/afrP1QrxQ==
+"@trpc/server@^11.8.0":
+  version "11.8.0"
+  resolved "https://registry.yarnpkg.com/@trpc/server/-/server-11.8.0.tgz#2f6b37e79a6774628be0a050c8ef8b4e55385222"
+  integrity sha512-DphyQnLuyX2nwJCQGWQ9zYz4hZGvRhSBqDhQ0SH3tDhQ3PU4u68xofA0pJ741Ir4InEAFD+TtJVLAQy+wVOkiQ==
 
 "@ts-morph/common@~0.27.0":
   version "0.27.0"
