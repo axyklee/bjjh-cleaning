@@ -1,6 +1,6 @@
 import z from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
-import { accountCreateSchema, areaCreateSchema, classCreateSchema, defaultCreateSchema } from "~/lib/schema/admin";
+import { accountCreateSchema, areaCreateSchema, classCreateSchema, defaultCreateSchema, classUpdateSchema, areaUpdateSchema, defaultUpdateSchema } from "~/lib/schema/admin";
 import { env } from "~/env";
 
 export const settingsRouter = createTRPCRouter({
@@ -30,6 +30,18 @@ export const settingsRouter = createTRPCRouter({
             });
         }
     ),
+    classUpdate: protectedProcedure
+        .input(classUpdateSchema)
+        .mutation(async ({ ctx, input }) => {
+            await ctx.db.class.update({
+                where: {
+                    id: input.id,
+                },
+                data: {
+                    name: input.name,
+                },
+            });
+        }),
     classDelete: protectedProcedure
         .input(z.number().int())
         .mutation(async ({ ctx, input }) => {
@@ -80,6 +92,19 @@ export const settingsRouter = createTRPCRouter({
             });
         }
     ),
+    areaUpdate: protectedProcedure
+        .input(areaUpdateSchema)
+        .mutation(async ({ ctx, input }) => {
+            await ctx.db.area.update({
+                where: {
+                    id: input.id,
+                },
+                data: {
+                    name: input.name,
+                    classId: parseInt(input.classId),
+                },
+            });
+        }),
     areaDelete: protectedProcedure
         .input(z.number().int())
         .mutation(async ({ ctx, input }) => {
@@ -197,6 +222,19 @@ export const settingsRouter = createTRPCRouter({
             });
         }
     ),
+    defaultUpdate: protectedProcedure
+        .input(defaultUpdateSchema)
+        .mutation(async ({ ctx, input }) => {
+            await ctx.db.default.update({
+                where: {
+                    id: input.id,
+                },
+                data: {
+                    shorthand: input.shorthand,
+                    text: input.text,
+                },
+            });
+        }),
     defaultDelete: protectedProcedure
         .input(z.number().int())
         .mutation(async ({ ctx, input }) => {

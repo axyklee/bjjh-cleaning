@@ -3,6 +3,7 @@
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import { EditableCell, EditableSelectCell } from "~/components/ui/editable-cell";
 import { api } from "~/trpc/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
@@ -16,6 +17,7 @@ export default function AreaTab() {
     const classes = api.admin.settings.classGetAll.useQuery();
     const areas = api.admin.settings.areaGetAll.useQuery();
     const createArea = api.admin.settings.areaCreate.useMutation();
+    const updateArea = api.admin.settings.areaUpdate.useMutation();
     const deleteArea = api.admin.settings.areaDelete.useMutation();
 
     const moveUpArea = api.admin.settings.areaMoveUp.useMutation();
@@ -49,8 +51,34 @@ export default function AreaTab() {
                     <TableBody>
                         {areas.data?.map((areaItem) => (
                             <TableRow key={areaItem.id}>
-                                <TableCell>{areaItem.name}</TableCell>
-                                <TableCell>{areaItem.class.name}</TableCell>
+                                <TableCell>
+                                    <EditableCell
+                                        value={areaItem.name}
+                                        onSave={async (newName) => {
+                                            await updateArea.mutateAsync({
+                                                id: areaItem.id,
+                                                name: newName,
+                                                classId: areaItem.class.id.toString()
+                                            });
+                                            await queryClient.invalidateQueries();
+                                        }}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <EditableSelectCell
+                                        value={areaItem.class.id}
+                                        options={classes.data?.map(c => ({ label: c.name, value: c.id })) ?? []}
+                                        displayValue={areaItem.class.name}
+                                        onSave={async (newClassId) => {
+                                            await updateArea.mutateAsync({
+                                                id: areaItem.id,
+                                                name: areaItem.name,
+                                                classId: newClassId.toString()
+                                            });
+                                            await queryClient.invalidateQueries();
+                                        }}
+                                    />
+                                </TableCell>
                                 <TableCell>
                                     <Button variant="outline" onClick={
                                         async () => {
