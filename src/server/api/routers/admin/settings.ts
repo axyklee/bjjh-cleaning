@@ -163,6 +163,21 @@ export const settingsRouter = createTRPCRouter({
                 })
             ]);
         }),
+    areaUpdateRanks: protectedProcedure
+        .input(z.array(z.object({
+            id: z.number().int(),
+            rank: z.number().int()
+        })))
+        .mutation(async ({ ctx, input }) => {
+            await ctx.db.$transaction(
+                input.map(({ id, rank }) =>
+                    ctx.db.area.update({
+                        where: { id },
+                        data: { rank }
+                    })
+                )
+            );
+        }),
     defaultGetAll: protectedProcedure.query(async ({ ctx }) => {
         return ctx.db.default.findMany({
             select: {
@@ -287,6 +302,21 @@ export const settingsRouter = createTRPCRouter({
                     data: { rank: def.rank }
                 })
             ]);
+        }),
+    defaultUpdateRanks: protectedProcedure
+        .input(z.array(z.object({
+            id: z.number().int(),
+            rank: z.number().int()
+        })))
+        .mutation(async ({ ctx, input }) => {
+            await ctx.db.$transaction(
+                input.map(({ id, rank }) =>
+                    ctx.db.default.update({
+                        where: { id },
+                        data: { rank }
+                    })
+                )
+            );
         }),
     accountGetAll: protectedProcedure
         .query(async ({ ctx }) => {
