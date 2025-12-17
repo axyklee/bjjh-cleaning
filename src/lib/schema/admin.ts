@@ -4,12 +4,29 @@ export const classCreateSchema = z.object({
     name: z.string().min(1, "請輸入班級名稱"),
 })
 
+export const classUpdateSchema = z.object({
+    id: z.number().int(),
+    name: z.string().min(1, "請輸入班級名稱"),
+})
+
 export const areaCreateSchema = z.object({
     name: z.string().min(1, "請輸入掃區名稱"),
     classId: z.string().min(1, "請選擇班級"),
 })
 
+export const areaUpdateSchema = z.object({
+    id: z.number().int(),
+    name: z.string().min(1, "請輸入掃區名稱"),
+    classId: z.number().int().min(1, "請選擇班級"),
+})
+
 export const defaultCreateSchema = z.object({
+    shorthand: z.string().min(1, "請輸入簡寫"),
+    text: z.string().min(1, "請輸入完整訊息"),
+})
+
+export const defaultUpdateSchema = z.object({
+    id: z.number().int(),
     shorthand: z.string().min(1, "請輸入簡寫"),
     text: z.string().min(1, "請輸入完整訊息"),
 })

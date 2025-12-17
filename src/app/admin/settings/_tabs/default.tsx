@@ -3,6 +3,7 @@
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import { EditableCell } from "~/components/ui/editable-cell";
 import { api } from "~/trpc/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
@@ -15,6 +16,7 @@ export default function DefaultTab() {
 
     const defaults = api.admin.settings.defaultGetAll.useQuery();
     const createDefault = api.admin.settings.defaultCreate.useMutation();
+    const updateDefault = api.admin.settings.defaultUpdate.useMutation();
     const deleteDefault = api.admin.settings.defaultDelete.useMutation();
 
     const moveUpDefault = api.admin.settings.defaultMoveUp.useMutation();
@@ -47,8 +49,32 @@ export default function DefaultTab() {
                     <TableBody>
                         {defaults.data?.map((defaultItem) => (
                             <TableRow key={defaultItem.id}>
-                                <TableCell>{defaultItem.shorthand}</TableCell>
-                                <TableCell>{defaultItem.text}</TableCell>
+                                <TableCell>
+                                    <EditableCell
+                                        value={defaultItem.shorthand}
+                                        onSave={async (newShorthand) => {
+                                            await updateDefault.mutateAsync({
+                                                id: defaultItem.id,
+                                                shorthand: newShorthand,
+                                                text: defaultItem.text
+                                            });
+                                            await queryClient.invalidateQueries();
+                                        }}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <EditableCell
+                                        value={defaultItem.text}
+                                        onSave={async (newText) => {
+                                            await updateDefault.mutateAsync({
+                                                id: defaultItem.id,
+                                                shorthand: defaultItem.shorthand,
+                                                text: newText
+                                            });
+                                            await queryClient.invalidateQueries();
+                                        }}
+                                    />
+                                </TableCell>
                                 <TableCell>
                                     <Button variant="outline" onClick={
                                         async () => {
