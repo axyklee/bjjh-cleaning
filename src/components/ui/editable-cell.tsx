@@ -31,7 +31,12 @@ export function EditableCell({ value, onSave, className }: EditableCellProps) {
         await onSave(editValue)
         setIsEditing(false)
       } catch (error) {
-        console.error("Failed to save:", error)
+        console.error("Failed to save cell value:", {
+          operation: "updateCell",
+          originalValue: value,
+          newValue: editValue,
+          error: error instanceof Error ? error.message : String(error)
+        })
         setEditValue(value) // Revert on error
       } finally {
         setIsSaving(false)
@@ -74,7 +79,7 @@ export function EditableCell({ value, onSave, className }: EditableCellProps) {
         className
       )}
     >
-      {value || <span className="text-muted-foreground">Click to edit</span>}
+      {value || <span className="text-muted-foreground">點擊編輯</span>}
     </div>
   )
 }
@@ -105,7 +110,12 @@ export function EditableSelectCell({
         await onSave(numValue)
         setIsEditing(false)
       } catch (error) {
-        console.error("Failed to save:", error)
+        console.error("Failed to save select value:", {
+          operation: "updateSelectCell",
+          originalValue: value,
+          newValue: numValue,
+          error: error instanceof Error ? error.message : String(error)
+        })
       } finally {
         setIsSaving(false)
       }

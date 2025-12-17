@@ -58,7 +58,7 @@ export default function AreaTab() {
                                             await updateArea.mutateAsync({
                                                 id: areaItem.id,
                                                 name: newName,
-                                                classId: areaItem.class.id
+                                                classId: areaItem.class.id.toString()
                                             });
                                             await queryClient.invalidateQueries();
                                         }}
@@ -73,7 +73,7 @@ export default function AreaTab() {
                                             await updateArea.mutateAsync({
                                                 id: areaItem.id,
                                                 name: areaItem.name,
-                                                classId: newClassId
+                                                classId: newClassId.toString()
                                             });
                                             await queryClient.invalidateQueries();
                                         }}
