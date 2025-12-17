@@ -9,7 +9,7 @@ import { ArrowDown, ArrowUp, GripVertical, Trash2 } from "lucide-react";
 import GeneratedForm, { type zGenForm } from "~/_helper/generatedForm";
 import { areaCreateSchema } from "~/lib/schema/admin";
 import type z from "zod";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
     DndContext,
     closestCenter,
@@ -104,9 +104,11 @@ export default function AreaTab() {
     const [items, setItems] = useState<AreaItem[]>([]);
 
     // Update items when areas data changes
-    if (areas.data && JSON.stringify(items) !== JSON.stringify(areas.data)) {
-        setItems(areas.data);
-    }
+    React.useEffect(() => {
+        if (areas.data) {
+            setItems(areas.data);
+        }
+    }, [areas.data]);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -132,7 +134,7 @@ export default function AreaTab() {
             }));
 
             await updateRanks.mutateAsync(updates);
-            await queryClient.invalidateQueries();
+            await queryClient.invalidateQueries({ queryKey: [["admin", "settings", "areaGetAll"]] });
         }
     };
 
@@ -178,16 +180,16 @@ export default function AreaTab() {
                                         onDelete={async () => {
                                             if (confirm(`確定要刪除掃區 ${areaItem.name} 嗎？`)) {
                                                 await deleteArea.mutateAsync(areaItem.id);
-                                                await queryClient.invalidateQueries();
+                                                await queryClient.invalidateQueries({ queryKey: [["admin", "settings", "areaGetAll"]] });
                                             }
                                         }}
                                         onMoveUp={async () => {
                                             await moveUpArea.mutateAsync(areaItem.id);
-                                            await queryClient.invalidateQueries();
+                                            await queryClient.invalidateQueries({ queryKey: [["admin", "settings", "areaGetAll"]] });
                                         }}
                                         onMoveDown={async () => {
                                             await moveDownArea.mutateAsync(areaItem.id);
-                                            await queryClient.invalidateQueries();
+                                            await queryClient.invalidateQueries({ queryKey: [["admin", "settings", "areaGetAll"]] });
                                         }}
                                     />
                                 ))}

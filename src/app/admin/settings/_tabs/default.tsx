@@ -9,7 +9,7 @@ import { ArrowDown, ArrowUp, GripVertical, Trash2 } from "lucide-react";
 import GeneratedForm, { type zGenForm } from "~/_helper/generatedForm";
 import { defaultCreateSchema } from "~/lib/schema/admin";
 import type z from "zod";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
     DndContext,
     closestCenter,
@@ -99,9 +99,11 @@ export default function DefaultTab() {
     const [items, setItems] = useState<DefaultItem[]>([]);
 
     // Update items when defaults data changes
-    if (defaults.data && JSON.stringify(items) !== JSON.stringify(defaults.data)) {
-        setItems(defaults.data);
-    }
+    React.useEffect(() => {
+        if (defaults.data) {
+            setItems(defaults.data);
+        }
+    }, [defaults.data]);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -127,7 +129,7 @@ export default function DefaultTab() {
             }));
 
             await updateRanks.mutateAsync(updates);
-            await queryClient.invalidateQueries();
+            await queryClient.invalidateQueries({ queryKey: [["admin", "settings", "defaultGetAll"]] });
         }
     };
 
@@ -172,16 +174,16 @@ export default function DefaultTab() {
                                         onDelete={async () => {
                                             if (confirm(`確定要刪除此預設訊息 ${defaultItem.shorthand} 嗎？`)) {
                                                 await deleteDefault.mutateAsync(defaultItem.id);
-                                                await queryClient.invalidateQueries();
+                                                await queryClient.invalidateQueries({ queryKey: [["admin", "settings", "defaultGetAll"]] });
                                             }
                                         }}
                                         onMoveUp={async () => {
                                             await moveUpDefault.mutateAsync(defaultItem.id);
-                                            await queryClient.invalidateQueries();
+                                            await queryClient.invalidateQueries({ queryKey: [["admin", "settings", "defaultGetAll"]] });
                                         }}
                                         onMoveDown={async () => {
                                             await moveDownDefault.mutateAsync(defaultItem.id);
-                                            await queryClient.invalidateQueries();
+                                            await queryClient.invalidateQueries({ queryKey: [["admin", "settings", "defaultGetAll"]] });
                                         }}
                                     />
                                 ))}
