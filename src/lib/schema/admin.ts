@@ -17,7 +17,7 @@ export const areaCreateSchema = z.object({
 export const areaUpdateSchema = z.object({
     id: z.number().int(),
     name: z.string().min(1, "請輸入掃區名稱"),
-    classId: z.number().int().min(1, "請選擇班級"),
+    classId: z.string().min(1, "請選擇班級"),
 })
 
 export const defaultCreateSchema = z.object({

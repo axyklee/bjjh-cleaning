@@ -101,7 +101,7 @@ export const settingsRouter = createTRPCRouter({
                 },
                 data: {
                     name: input.name,
-                    classId: input.classId,
+                    classId: parseInt(input.classId),
                 },
             });
         }),
