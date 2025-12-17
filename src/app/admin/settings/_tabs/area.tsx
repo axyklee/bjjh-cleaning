@@ -101,7 +101,7 @@ export default function AreaTab() {
     const moveDownArea = api.admin.settings.areaMoveDown.useMutation();
     const updateRanks = api.admin.settings.areaUpdateRanks.useMutation();
 
-    const [items, setItems] = useState<AreaItem[]>([]);
+    const [items, setItems] = useState<AreaItem[]>(areas.data ?? []);
 
     // Update items when areas data changes
     React.useEffect(() => {

@@ -96,7 +96,7 @@ export default function DefaultTab() {
     const moveDownDefault = api.admin.settings.defaultMoveDown.useMutation();
     const updateRanks = api.admin.settings.defaultUpdateRanks.useMutation();
 
-    const [items, setItems] = useState<DefaultItem[]>([]);
+    const [items, setItems] = useState<DefaultItem[]>(defaults.data ?? []);
 
     // Update items when defaults data changes
     React.useEffect(() => {
