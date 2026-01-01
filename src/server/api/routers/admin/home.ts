@@ -1,11 +1,13 @@
 import z from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { env } from "~/env";
+import { assert } from "console";
 
 export const adminHomeRouter = createTRPCRouter({
     getReportsSortedByClass: protectedProcedure
         .input(z.object({
             date: z.string().min(1, "請輸入日期").regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式錯誤，請使用 YYYY-MM-DD"),
+            interleaved: z.boolean().optional(),
         }))
         .query(async ({ ctx, input }) => {
             const classes = await ctx.db.class.findMany({
@@ -45,6 +47,18 @@ export const adminHomeRouter = createTRPCRouter({
                         reports: reports
                     };
                 }));
+            if (input.interleaved) {
+                const interleavedRet = [];
+                const halfLength = Math.ceil(ret.length / 2);
+                for (let i = 0; i < halfLength; i += 1) {
+                    interleavedRet.push(ret[i]!);  
+                    if (i + halfLength < ret.length) {
+                        interleavedRet.push(ret[i + halfLength]!);
+                    }
+                }
+                assert(interleavedRet.length === ret.length);
+                return interleavedRet;
+            }
             return ret;
         }),
     reportDeleteOne: protectedProcedure

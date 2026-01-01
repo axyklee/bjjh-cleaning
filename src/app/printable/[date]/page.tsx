@@ -1,17 +1,21 @@
 "use client"
 
 import { format } from "date-fns";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import Notification from "~/app/admin/_components/notification";
 import { api } from "~/trpc/react";
 
 export default function PrintablePage() {
-  const params = useParams<{ date: string }>()
+  const params = useParams<{ date: string }>();
   const date = params.date ? new Date(params.date) : new Date();
 
+  const searchParams = useSearchParams();
+  const interleaved = searchParams.get("interleaved") === "true";
+
   const reports = api.admin.home.getReportsSortedByClass.useQuery({
-    date: date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd")
+    date: date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+    interleaved,
   }, {
     enabled: !!date,
     refetchOnWindowFocus: false,

@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from 'date-fns';
-import { CalendarIcon, Check, Download, HomeIcon, Printer } from 'lucide-react';
+import { CalendarIcon, Check, CircleQuestionMark, Download, HomeIcon, Printer } from 'lucide-react';
 import { useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion';
 import { Button } from '~/components/ui/button';
@@ -14,6 +14,7 @@ import { Skeleton } from '~/components/ui/skeleton';
 import { Badge } from '~/components/ui/badge';
 import JSZip from 'jszip';
 import { Progress } from '~/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
 
 const AdminPage = () => {
     const [date, setDate] = useState<Date>(new Date());
@@ -50,6 +51,22 @@ const AdminPage = () => {
                         <Printer />
                         列印所有通知單
                     </Button>
+                </Link>
+                <Link href={`printable/${date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd")}?interleaved=true`} target="_blank">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="outline">
+                                <Printer />
+                                列印 (交錯分頁)
+                                <CircleQuestionMark className="ml-1 h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                            因通知單為 A5 大小，交錯分頁方便裁切後保持順序。
+                            <img src="/interleaved_example.png" alt="交錯分頁示意圖" className="mt-2 w-[150px] border" />
+                        </TooltipContent>
+                    </Tooltip>
+
                 </Link>
                 <Button
                     disabled={!reports.data || reports.data.length === 0 || downloadStatus > 0}
