@@ -297,7 +297,7 @@ export default function EvaluatePage() {
                         </DialogTrigger>
                         <DialogContent className="overflow-y-scroll max-h-screen" onOpenAutoFocus={(e) => e.preventDefault()}>
                             <DialogHeader>
-                                <DialogTitle>回報狀況</DialogTitle>
+                                <DialogTitle>回報狀況: {areas.data?.find(a => a.id === parseInt(selectedArea ?? "0"))?.name}</DialogTitle>
                                 <DialogDescription>
                                     請確認以下狀況是否屬實，並按下送出。
                                 </DialogDescription>
