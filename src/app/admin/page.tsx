@@ -82,10 +82,10 @@ const AdminPage = () => {
                             const folder = zip.folder(report.area.class.name) ?? zip;
                             const areaName = report.area.name;
                             const content =  `地點: ${areaName}
-                                            \n日期: ${report.date}
-                                            \n時間: ${format(new Date(report.createdAt), "HH:mm")}
-                                            \n狀況: ${report.text}
-                                            \n備註: ${report.comment ?? "無"}\n`;
+日期: ${report.date}
+時間: ${format(new Date(report.createdAt), "HH:mm")}
+狀況: ${report.text}
+備註: ${report.comment ?? "無"}\n`;
                             const fileName = `${areaName}_${report.text}_${report.id}.txt`;
                             folder.file(fileName, content);
 
