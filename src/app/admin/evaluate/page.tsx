@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover
 import { Calendar } from "~/components/ui/calendar";
 import { getLastWorkday } from "~/lib/utils";
 import { format } from "date-fns";
-import imageCompression from 'browser-image-compression';
+import imageCompression, { type Options } from 'browser-image-compression';
 
 export default function EvaluatePage() {
     const areas = api.admin.settings.areaGetAll.useQuery(undefined, {
@@ -35,6 +35,7 @@ export default function EvaluatePage() {
 
     const [uploadedImagePaths, setUploadedImagePaths] = useState<string[]>([]);
     const [fileUploadMsg, setFileUploadMsg] = useState<string | null>(null);
+    const [fileUploadProgress, setFileUploadProgress] = useState<number>(0);
     const uploadUrl = api.admin.evaluate.getEvidenceUploadUrl.useQuery();
 
     const uploadedImageUrls = api.admin.evaluate.getImageUrls.useQuery({
@@ -86,15 +87,16 @@ export default function EvaluatePage() {
             name: "file",
             label: "證明照片",
             type: "custom",
-            disabled: uploadUrl.isLoading || fileUploadMsg === "上傳檔案中...",
             custom: (form) => (<div className="m-0">
                 <Input
                     type="file"
                     accept="image/*"
                     capture="environment"
+                    disabled={uploadUrl.isLoading || fileUploadMsg === "上傳檔案中..." || fileUploadMsg === "壓縮檔案中..."}
                     onChange={async (e) => {
                         form.clearErrors("file");
                         setFileUploadMsg(null);
+                        setFileUploadProgress(1);
 
                         if (!uploadUrl.data) {
                             form.setError("file", {
@@ -111,17 +113,22 @@ export default function EvaluatePage() {
                             return;
                         }
 
-                        setFileUploadMsg("上傳檔案中...");
+                        setFileUploadMsg("壓縮檔案中...");
 
                         const file = e.target.files[0];
 
-                        const options = {
+                        const options: Options = {
                             maxSizeMB: 1,
                             maxWidthOrHeight: 1920,
                             useWebWorker: true,
+                            onProgress: (progress) => {
+                                setFileUploadProgress(progress * 0.5); // first half for compression
+                            }
                         }
                         try {
                             const compressedFile = await imageCompression(file, options);
+
+                            setFileUploadMsg("上傳檔案中...");
 
                             await fetch(
                                 uploadUrl.data?.url ?? "",
@@ -134,6 +141,8 @@ export default function EvaluatePage() {
                                 }
                             );
 
+                            setFileUploadProgress(80); // 80% after upload
+
                             setUploadedImagePaths((prev) => {
                                 const newPaths = [...prev, uploadUrl.data?.path ?? ""];
                                 // Update form value with the new paths
@@ -145,6 +154,7 @@ export default function EvaluatePage() {
 
                             await uploadedImageUrls.refetch();
                             setFileUploadMsg("上傳檔案成功");
+                            setFileUploadProgress(100); // complete after refetch
                         } catch (error: unknown) {
                             if (error instanceof Error) {
                                 form.setError("file", {
@@ -155,6 +165,7 @@ export default function EvaluatePage() {
                         }
                     }}
                 />
+                <Progress value={fileUploadProgress} className="my-2" />
                 {fileUploadMsg && <p>{fileUploadMsg}</p>}
                 <div className="list">
                     {uploadedImageUrls.data?.map((url, index) => (
@@ -304,6 +315,7 @@ export default function EvaluatePage() {
                             </DialogHeader>
                             <GeneratedForm schema={evaluateReportSchema}
                                 formGen={formGen}
+                                disabled={() => uploadUrl.isLoading || fileUploadMsg === "上傳檔案中..." || fileUploadMsg === "壓縮檔案中..."}
                                 handleSubmit={async (data: z.infer<typeof evaluateReportSchema>) => {
                                     return await submitReport.mutateAsync(data)
                                         .then(async () => {

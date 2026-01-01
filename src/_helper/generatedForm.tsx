@@ -39,6 +39,7 @@ export type zGenForm = {
 export default function GeneratedForm(props: {
     schema: z.ZodObject<any>,
     formGen: zGenForm,
+    disabled?: () => boolean,
     handleSubmit: (data: any, form: UseFormReturn<Record<string, any>, any, undefined>) => Promise<{
         success: boolean;
         message?: string;
@@ -122,7 +123,7 @@ export default function GeneratedForm(props: {
                         )} />
                     )
                 }
-                <Button type="submit" disabled={disabled}>
+                <Button type="submit" disabled={disabled || props.disabled?.()}>
                     送出
                 </Button>
                 {error && <p className="mt-2 text-red-500">{error}</p>}
