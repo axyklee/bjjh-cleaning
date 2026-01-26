@@ -1,7 +1,7 @@
 import z from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
-import { env } from "~/env";
 import { assert } from "console";
+import { getBucketName } from "~/server/storage";
 
 export const adminHomeRouter = createTRPCRouter({
     getReportsSortedByClass: protectedProcedure
@@ -108,7 +108,7 @@ export const adminHomeRouter = createTRPCRouter({
             });
             return await Promise.all(reports.map(async (r) => {
                 const evidence = await Promise.all((JSON.parse(r.evidence ?? "[]") as string[]).map(async (path) => {
-                    const imgPath = await ctx.s3.presignedGetObject(env.MINIO_BUCKET, path, 24 * 60 * 60);
+                    const imgPath = await ctx.s3.presignedGetObject(getBucketName(), path, 24 * 60 * 60);
                     return imgPath;
                 }));
                 return {

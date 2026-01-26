@@ -1,7 +1,7 @@
 import z from "zod";
-import { env } from "~/env";
 import { evaluateReportSchema } from "~/lib/schema/admin";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { getBucketName } from "~/server/storage";
 
 export const evaluateRouter = createTRPCRouter({
     defaultGetAll: protectedProcedure
@@ -61,7 +61,7 @@ export const evaluateRouter = createTRPCRouter({
             const path = "evidence/" + Math.random().toString(10).substring(2, 13);
             return {
                 path: path,
-                url: await ctx.s3.presignedPutObject(env.MINIO_BUCKET, path, 60 * 60) // 1 hour
+                url: await ctx.s3.presignedPutObject(getBucketName(), path, 60 * 60) // 1 hour
             };
         }),
     getImageUrls: protectedProcedure
@@ -70,7 +70,7 @@ export const evaluateRouter = createTRPCRouter({
         }))
         .query(async ({ ctx, input }) => {
             return await Promise.all(input.paths.map(async (path) => {
-                return await ctx.s3.presignedGetObject(env.MINIO_BUCKET, path, 24 * 60 * 60); // 24 hours
+                return await ctx.s3.presignedGetObject(getBucketName(), path, 24 * 60 * 60); // 24 hours
             }));
         }),
     submitReport: protectedProcedure

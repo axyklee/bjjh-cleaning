@@ -13,7 +13,7 @@ import { ZodError } from "zod";
 
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
-import { s3 } from "../minio";
+import { s3 } from "../storage";
 
 /**
  * 1. CONTEXT

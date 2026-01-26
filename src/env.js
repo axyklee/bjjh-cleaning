@@ -15,13 +15,16 @@ export const env = createEnv({
     AUTH_GOOGLE_CLIENT_ID: z.string(),
     AUTH_GOOGLE_CLIENT_SECRET: z.string(),
     AUTH_URL: z.url(),
-    DATABASE_URL: z.url(),
-    MINIO_ENDPOINT: z.string(),
-    MINIO_PORT: z.string(),
-    MINIO_ACCESS_KEY: z.string(),
-    MINIO_SECRET_KEY: z.string(),
-    MINIO_BUCKET: z.string(),
+    DATABASE_URL: z.string(), // Changed from z.url() to support D1 connection strings
+    // MinIO settings (for development/non-Cloudflare environments)
+    MINIO_ENDPOINT: z.string().optional(),
+    MINIO_PORT: z.string().optional(),
+    MINIO_ACCESS_KEY: z.string().optional(),
+    MINIO_SECRET_KEY: z.string().optional(),
+    MINIO_BUCKET: z.string().optional(),
     MINIO_USE_SSL: z.boolean().default(false),
+    // R2 settings (for Cloudflare Workers)
+    R2_PUBLIC_URL: z.string().optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -53,6 +56,7 @@ export const env = createEnv({
     MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
     MINIO_BUCKET: process.env.MINIO_BUCKET,
     MINIO_USE_SSL: process.env.MINIO_USE_SSL === "true",
+    R2_PUBLIC_URL: process.env.R2_PUBLIC_URL,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**
