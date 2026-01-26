@@ -3,6 +3,7 @@
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import { EditableCell } from "~/components/ui/editable-cell";
 import { api } from "~/trpc/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
@@ -15,6 +16,7 @@ export default function ClassTab() {
 
     const classes = api.admin.settings.classGetAll.useQuery();
     const createClass = api.admin.settings.classCreate.useMutation();
+    const updateClass = api.admin.settings.classUpdate.useMutation();
     const deleteClass = api.admin.settings.classDelete.useMutation();
 
     const formGen: zGenForm = [
@@ -39,7 +41,16 @@ export default function ClassTab() {
                         {classes.data?.map((classItem) => (
                             <TableRow key={classItem.id}>
                                 <TableCell>
-                                    <code>{classItem.name}</code>
+                                    <EditableCell
+                                        value={classItem.name}
+                                        onSave={async (newName) => {
+                                            await updateClass.mutateAsync({
+                                                id: classItem.id,
+                                                name: newName
+                                            });
+                                            await queryClient.invalidateQueries();
+                                        }}
+                                    />
                                 </TableCell>
                                 <TableCell>
                                     <Button variant="destructive" onClick={
