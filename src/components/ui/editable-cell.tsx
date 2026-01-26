@@ -75,7 +75,7 @@ export function EditableCell({ value, onSave, className }: EditableCellProps) {
     <div
       onClick={() => setIsEditing(true)}
       className={cn(
-        "cursor-pointer rounded px-2 py-1 hover:bg-accent/50 min-h-[32px] flex items-center",
+        "cursor-pointer rounded px-2 py-1 hover:bg-border/50 min-h-[32px] flex items-center",
         className
       )}
     >
@@ -155,7 +155,7 @@ export function EditableSelectCell({
     <div
       onClick={() => setIsEditing(true)}
       className={cn(
-        "cursor-pointer rounded px-2 py-1 hover:bg-accent/50 min-h-[32px] flex items-center",
+        "cursor-pointer rounded px-2 py-1 hover:bg-border/50 min-h-[32px] flex items-center",
         className
       )}
     >
