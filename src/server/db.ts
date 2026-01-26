@@ -6,8 +6,9 @@ import { env } from "~/env";
 
 const createPrismaClient = () => {
   // Check if we're running in a Cloudflare Worker environment
-  // In Cloudflare Workers, the D1 database is available via the platform context
-  // This will be undefined in Node.js environments
+  // In Cloudflare Workers with @cloudflare/next-on-pages, D1 database bindings
+  // are available on globalThis. The binding name 'DB' in wrangler.toml
+  // makes the D1 database available as globalThis.DB
   const d1Database = (globalThis as { DB?: D1Database }).DB;
   
   if (d1Database) {

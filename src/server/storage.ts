@@ -33,15 +33,19 @@ class R2StorageClient implements StorageClient {
   }
 
   async presignedPutObject(_bucket: string, key: string, _expiry: number): Promise<string> {
-    // For R2, we can return a direct upload URL or use a custom endpoint
-    // This would require implementing a custom upload handler
-    // For now, return the public URL format
+    // IMPORTANT: R2 doesn't support presigned PUT URLs directly from Workers
+    // This returns a public URL format. In production, you should:
+    // 1. Use direct R2.put() calls from the Worker, OR
+    // 2. Implement a custom upload endpoint that accepts file data and uses R2.put()
+    // 3. Use Cloudflare's upload API or a custom signed URL solution
+    // For now, return the public URL format (client will need to send data to a Worker endpoint)
     return `${this.publicUrl}/${key}`;
   }
 
   async presignedGetObject(_bucket: string, key: string, _expiry: number): Promise<string> {
     // For R2, return the public URL
-    // In production, you may want to implement signed URLs via a Worker
+    // If using private buckets, you'll need to implement custom signed URLs
+    // through a Worker endpoint that validates access and returns R2 content
     return `${this.publicUrl}/${key}`;
   }
 
@@ -76,6 +80,9 @@ export function getBucketName(): string {
 // Create the appropriate storage client based on environment
 function createStorageClient(): StorageClient {
   // Check if we're in a Cloudflare Workers environment
+  // Note: In Cloudflare Workers, bindings like R2 are available on globalThis
+  // when using @cloudflare/next-on-pages with the correct wrangler.toml configuration
+  // The binding name 'R2' in wrangler.toml makes the bucket available as globalThis.R2
   const r2Bucket = (globalThis as { R2?: R2Bucket }).R2;
   if (r2Bucket) {
     return new R2StorageClient(r2Bucket);
