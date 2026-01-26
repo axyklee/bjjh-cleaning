@@ -36,3 +36,23 @@ export function getLastWorkday(input: string): string {
 
   return `${yyyy}-${mm}-${dd}`;
 }
+
+export async function asyncPool<T>(
+  limit: number,
+  tasks: (() => Promise<T>)[]
+) {
+  const executing: Promise<any>[] = []
+
+  for (const task of tasks) {
+    const p = task().finally(() => {
+      executing.splice(executing.indexOf(p), 1)
+    })
+    executing.push(p)
+
+    if (executing.length >= limit) {
+      await Promise.race(executing)
+    }
+  }
+
+  await Promise.all(executing)
+}

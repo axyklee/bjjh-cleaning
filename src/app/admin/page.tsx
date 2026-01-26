@@ -15,6 +15,7 @@ import { Badge } from '~/components/ui/badge';
 import JSZip from 'jszip';
 import { Progress } from '~/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
+import { asyncPool } from '~/lib/utils';
 
 const AdminPage = () => {
     const [date, setDate] = useState<Date>(new Date());
@@ -78,7 +79,7 @@ const AdminPage = () => {
                         const evidenceCount = data.map(c => c.evidence.length).reduce((a, b) => a + b, 0);
                         let processedCount = 0;
 
-                        await Promise.all(data.map(async (report) => {
+                        const tasks = data.map((report) => async () => {
                             const folder = zip.folder(report.area.class.name) ?? zip;
                             const areaName = report.area.name;
                             const content =  `地點: ${areaName}
@@ -98,7 +99,10 @@ const AdminPage = () => {
                                 setDownloadStatus(Math.floor((1.0 * processedCount / evidenceCount) * 100));
                             }));
 
-                        }));
+                            return undefined;
+                        });
+                        await asyncPool<undefined>(5, tasks);
+
                         const blob = await zip.generateAsync({ type: "blob" });
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement("a");
