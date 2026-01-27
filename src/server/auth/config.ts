@@ -1,9 +1,11 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import { env } from "~/env";
+import { eq } from "drizzle-orm";
 
 import { db } from "~/server/db";
+import { users } from "~/server/db/schema";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -48,18 +50,29 @@ export const authConfig = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
-  adapter: PrismaAdapter(db),
+  adapter: DrizzleAdapter(db),
   callbacks: {
     async signIn(params) {
       const { email } = params.user;
-      if (await db.user.findFirst({ where: { email } })) {
+      if (!email) return false;
+      
+      // Check if user exists
+      const existingUser = await db.query.users.findFirst({
+        where: eq(users.email, email),
+      });
+      
+      if (existingUser) {
         // User already exists, allow sign in
         return true;
       }
-      if (await db.user.count() === 0) {
+      
+      // Check if any users exist
+      const allUsers = await db.query.users.findMany({ limit: 1 });
+      if (allUsers.length === 0) {
         // If no users exist, allow sign in to create the first admin user
         return true;
       }
+      
       return false;
     },
     session: ({ session, user }) => ({

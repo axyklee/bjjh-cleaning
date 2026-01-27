@@ -1,7 +1,9 @@
 import z from "zod";
+import { eq, and } from "drizzle-orm";
 import { evaluateReportSchema } from "~/lib/schema/admin";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { getBucketName } from "~/server/storage";
+import { defaults, reports } from "~/server/db/schema";
 
 export const evaluateRouter = createTRPCRouter({
     defaultGetAll: protectedProcedure
@@ -10,15 +12,13 @@ export const evaluateRouter = createTRPCRouter({
             standardDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format, expected YYYY-MM-DD")
         }))
         .query(async ({ ctx, input }) => {
-            const defaults = await ctx.db.default.findMany({
-                orderBy: {
-                    rank: "asc"
-                },
-                select: {
+            const allDefaults = await ctx.db.query.defaults.findMany({
+                columns: {
                     id: true,
                     text: true,
                     shorthand: true
-                }
+                },
+                orderBy: (defaults, { asc }) => [asc(defaults.rank)]
             });
             const today = new Date();
 
@@ -26,21 +26,21 @@ export const evaluateRouter = createTRPCRouter({
             const mm = String(today.getMonth() + 1).padStart(2, "0");
             const dd = String(today.getDate()).padStart(2, "0");
 
-            const reportsLastWorkday = await ctx.db.report.findMany({
-                where: {
-                    date: input.standardDate,
-                    areaId: input.areaId
-                }
+            const reportsLastWorkday = await ctx.db.query.reports.findMany({
+                where: and(
+                    eq(reports.date, input.standardDate),
+                    eq(reports.areaId, input.areaId)
+                )
             });
 
-            const reportsToday = await ctx.db.report.findMany({
-                where: {
-                    date: `${yyyy}-${mm}-${dd}`,
-                    areaId: input.areaId
-                }
+            const reportsToday = await ctx.db.query.reports.findMany({
+                where: and(
+                    eq(reports.date, `${yyyy}-${mm}-${dd}`),
+                    eq(reports.areaId, input.areaId)
+                )
             });
 
-            return defaults.map((d) => {
+            return allDefaults.map((d) => {
                 let reportedToday = false;
                 let repeatedToday = 0;
                 if (reportsToday.find(r => r.text === d.text)) {
@@ -76,15 +76,13 @@ export const evaluateRouter = createTRPCRouter({
     submitReport: protectedProcedure
         .input(evaluateReportSchema)
         .mutation(async ({ ctx, input }) => {
-            await ctx.db.report.create({
-                data: {
-                    date: input.date,
-                    text: input.text,
-                    repeated: parseInt(input.repeated),
-                    areaId: input.areaId,
-                    evidence: input.evidence,
-                    comment: input.comment
-                }
+            await ctx.db.insert(reports).values({
+                date: input.date,
+                text: input.text,
+                repeated: parseInt(input.repeated),
+                areaId: input.areaId,
+                evidence: input.evidence,
+                comment: input.comment
             });
         }),
 });

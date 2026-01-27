@@ -1,13 +1,11 @@
 import z from "zod";
+import { gte, lte, and } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
-import type { PrismaClient } from "@prisma/client";
-import type { DefaultArgs } from "@prisma/client/runtime/library";
+import { defaults, reports } from "~/server/db/schema";
 
-const getDefaults = async (db: PrismaClient<{
-    log: ("query" | "warn" | "error")[];
-}, "query" | "warn" | "error", DefaultArgs>) => {
-    return await db.default.findMany({
-        select: {
+const getDefaults = async (db: typeof import("~/server/db").db) => {
+    return await db.query.defaults.findMany({
+        columns: {
             id: true,
             text: true,
             shorthand: true,
@@ -37,32 +35,32 @@ export const analyticsRouter = createTRPCRouter({
         }))
         .query(async ({ input, ctx }) => {
             const { startDate, endDate } = input;
-            const reports = await ctx.db.report.findMany({
-                where: {
-                    date: {
-                        gte: startDate,
-                        lte: endDate,
-                    }
+            const allReports = await ctx.db.query.reports.findMany({
+                where: and(
+                    gte(reports.date, startDate),
+                    lte(reports.date, endDate)
+                ),
+                columns: {
+                    text: true
                 },
-                select: {
+                with: {
                     area: {
-                        select: {
+                        columns: {
                             id: true,
                             name: true
                         }
-                    },
-                    text: true
+                    }
                 }
             })
-            const defaults = await getDefaults(ctx.db);
+            const allDefaults = await getDefaults(ctx.db);
             const areaMap: {
                 key: string;
                 [key: number]: string | number;
             }[] = [];
-            reports.forEach(report => {
+            allReports.forEach(report => {
                 const areaName = report.area.name;
                 const reportText = report.text;
-                const reportDefaultId = defaults.find(def => def.text === reportText)?.id ?? 0;
+                const reportDefaultId = allDefaults.find(def => def.text === reportText)?.id ?? 0;
 
                 const areaEntry = areaMap.find(entry => entry.key === areaName);
                 if (!areaEntry) {
@@ -85,36 +83,37 @@ export const analyticsRouter = createTRPCRouter({
         }))
         .query(async ({ input, ctx }) => {
             const { startDate, endDate } = input;
-            const reports = await ctx.db.report.findMany({
-                where: {
-                    date: {
-                        gte: startDate,
-                        lte: endDate,
-                    }
+            const allReports = await ctx.db.query.reports.findMany({
+                where: and(
+                    gte(reports.date, startDate),
+                    lte(reports.date, endDate)
+                ),
+                columns: {
+                    text: true
                 },
-                select: {
+                with: {
                     area: {
-                        select: {
+                        columns: {},
+                        with: {
                             class: {
-                                select: {
+                                columns: {
                                     id: true,
                                     name: true
                                 }
                             }
                         }
-                    },
-                    text: true
+                    }
                 }
             })
-            const defaults = await getDefaults(ctx.db);
+            const allDefaults = await getDefaults(ctx.db);
             const classMap: {
                 key: string;
                 [key: number]: string | number;
             }[] = [];
-            reports.forEach(report => {
+            allReports.forEach(report => {
                 const className = report.area.class.name;
                 const reportText = report.text;
-                const reportDefaultId = defaults.find(def => def.text === reportText)?.id ?? 0;
+                const reportDefaultId = allDefaults.find(def => def.text === reportText)?.id ?? 0;
                 const classEntry = classMap.find(entry => entry.key === className);
                 if (!classEntry) {
                     classMap.push({ key: className, [reportDefaultId]: 1 });

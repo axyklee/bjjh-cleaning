@@ -1,7 +1,9 @@
 import z from "zod";
+import { eq } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { assert } from "console";
 import { getBucketName } from "~/server/storage";
+import { classes, reports } from "~/server/db/schema";
 
 export const adminHomeRouter = createTRPCRouter({
     getReportsSortedByClass: protectedProcedure
@@ -10,41 +12,48 @@ export const adminHomeRouter = createTRPCRouter({
             interleaved: z.boolean().optional(),
         }))
         .query(async ({ ctx, input }) => {
-            const classes = await ctx.db.class.findMany({
-                orderBy: {
-                    id: "asc"
-                },
-                select: {
+            const allClasses = await ctx.db.query.classes.findMany({
+                columns: {
                     id: true,
                     name: true
-                }
+                },
+                orderBy: (classes, { asc }) => [asc(classes.id)]
             });
             const ret =
-                await Promise.all(classes.map(async (c) => {
-                    const reports = await ctx.db.report.findMany({
-                        where: {
-                            date: input.date,
-                            area: {
-                                classId: c.id
-                            }
-                        },
-                        select: {
-                            area: {
-                                select: {
-                                    name: true
-                                }
-                            },
+                await Promise.all(allClasses.map(async (c) => {
+                    const classReports = await ctx.db.query.reports.findMany({
+                        where: eq(reports.date, input.date),
+                        columns: {
                             id: true,
                             text: true,
                             repeated: true,
                             evidence: true,
                             comment: true,
                             createdAt: true
+                        },
+                        with: {
+                            area: {
+                                columns: {
+                                    name: true,
+                                    classId: true
+                                }
+                            }
                         }
                     });
+                    const filteredReports = classReports.filter(r => r.area.classId === c.id);
                     return {
                         ...c,
-                        reports: reports
+                        reports: filteredReports.map(r => ({
+                            area: {
+                                name: r.area.name
+                            },
+                            id: r.id,
+                            text: r.text,
+                            repeated: r.repeated,
+                            evidence: r.evidence,
+                            comment: r.comment,
+                            createdAt: r.createdAt
+                        }))
                     };
                 }));
             if (input.interleaved) {
@@ -66,34 +75,16 @@ export const adminHomeRouter = createTRPCRouter({
             reportId: z.number().min(1),
         }))
         .mutation(async ({ ctx, input }) => {
-            await ctx.db.report.delete({
-                where: {
-                    id: input.reportId
-                }
-            });
+            await ctx.db.delete(reports).where(eq(reports.id, input.reportId));
         }),
     downloadReports: protectedProcedure
         .input(z.object({
             date: z.string().min(1, "請輸入日期").regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式錯誤，請使用 YYYY-MM-DD"),
         }))
         .mutation(async ({ ctx, input }) => {
-            const reports = await ctx.db.report.findMany({
-                where: {
-                    date: input.date
-                },
-                select: {
-                    area: {
-                        select: {
-                            class: {
-                                select: {
-                                    id: true,
-                                    name: true
-                                }
-                            },
-                            rank: true,
-                            name: true
-                        }
-                    },
+            const allReports = await ctx.db.query.reports.findMany({
+                where: eq(reports.date, input.date),
+                columns: {
                     evidence: true,
                     date: true,
                     createdAt: true,
@@ -101,12 +92,31 @@ export const adminHomeRouter = createTRPCRouter({
                     comment: true,
                     id: true
                 },
-                orderBy: [
-                    { area: { class: { id: "asc" } } },
-                    { area: { rank: "asc" } }
-                ]
+                with: {
+                    area: {
+                        columns: {
+                            rank: true,
+                            name: true
+                        },
+                        with: {
+                            class: {
+                                columns: {
+                                    id: true,
+                                    name: true
+                                }
+                            }
+                        }
+                    }
+                },
+                orderBy: (reports, { asc }) => [asc(reports.id)]
             });
-            return await Promise.all(reports.map(async (r) => {
+            const sortedReports = allReports.sort((a, b) => {
+                if (a.area.class.id !== b.area.class.id) {
+                    return a.area.class.id - b.area.class.id;
+                }
+                return a.area.rank - b.area.rank;
+            });
+            return await Promise.all(sortedReports.map(async (r) => {
                 const evidence = await Promise.all((JSON.parse(r.evidence ?? "[]") as string[]).map(async (path) => {
                     const imgPath = await ctx.s3.presignedGetObject(getBucketName(), path, 24 * 60 * 60);
                     return imgPath;
