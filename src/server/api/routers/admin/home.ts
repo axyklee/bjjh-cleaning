@@ -72,7 +72,7 @@ export const adminHomeRouter = createTRPCRouter({
                 }
             });
             if (report.evidence) {
-                await ctx.s3.removeObjects(env.MINIO_BUCKET, JSON.parse(report.evidence as string));
+                await ctx.s3.removeObjects(env.MINIO_BUCKET, JSON.parse(report.evidence) as string[]);
             }
         }),
     downloadReports: protectedProcedure
