@@ -19,43 +19,46 @@ export const adminHomeRouter = createTRPCRouter({
                 },
                 orderBy: (classes, { asc }) => [asc(classes.id)]
             });
-            const ret =
-                await Promise.all(allClasses.map(async (c) => {
-                    const classReports = await ctx.db.query.reports.findMany({
-                        where: eq(reports.date, input.date),
+            
+            // Fetch all reports for the date with area information
+            const allReports = await ctx.db.query.reports.findMany({
+                where: eq(reports.date, input.date),
+                columns: {
+                    id: true,
+                    text: true,
+                    repeated: true,
+                    evidence: true,
+                    comment: true,
+                    createdAt: true
+                },
+                with: {
+                    area: {
                         columns: {
-                            id: true,
-                            text: true,
-                            repeated: true,
-                            evidence: true,
-                            comment: true,
-                            createdAt: true
-                        },
-                        with: {
-                            area: {
-                                columns: {
-                                    name: true,
-                                    classId: true
-                                }
-                            }
+                            name: true,
+                            classId: true
                         }
-                    });
-                    const filteredReports = classReports.filter(r => r.area.classId === c.id);
-                    return {
-                        ...c,
-                        reports: filteredReports.map(r => ({
-                            area: {
-                                name: r.area.name
-                            },
-                            id: r.id,
-                            text: r.text,
-                            repeated: r.repeated,
-                            evidence: r.evidence,
-                            comment: r.comment,
-                            createdAt: r.createdAt
-                        }))
-                    };
-                }));
+                    }
+                }
+            });
+            
+            // Group reports by class
+            const ret = allClasses.map(c => {
+                const classReports = allReports.filter(r => r.area.classId === c.id);
+                return {
+                    ...c,
+                    reports: classReports.map(r => ({
+                        area: {
+                            name: r.area.name
+                        },
+                        id: r.id,
+                        text: r.text,
+                        repeated: r.repeated,
+                        evidence: r.evidence,
+                        comment: r.comment,
+                        createdAt: r.createdAt
+                    }))
+                };
+            });
             if (input.interleaved) {
                 const interleavedRet = [];
                 const halfLength = Math.ceil(ret.length / 2);
