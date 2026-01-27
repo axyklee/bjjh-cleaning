@@ -10,3 +10,6 @@ const config = {
 };
 
 export default config;
+
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();
