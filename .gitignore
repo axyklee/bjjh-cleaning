@@ -12,6 +12,10 @@
 /prisma/db.sqlite
 /prisma/db.sqlite-journal
 db.sqlite
+dev.db
+dev.db-journal
+*.db
+*.db-journal
 
 # next.js
 /.next/
@@ -38,6 +42,11 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# wrangler / cloudflare
+.wrangler
+.dev.vars
+wrangler.toml.local
 
 # typescript
 *.tsbuildinfo

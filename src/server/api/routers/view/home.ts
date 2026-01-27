@@ -1,6 +1,6 @@
 import z from "zod";
 import { createTRPCRouter, publicProcedure } from "../../trpc";
-import { env } from "~/env";
+import { getBucketName } from "~/server/storage";
 
 export const viewHomeRouter = createTRPCRouter({
     getRecords: publicProcedure
@@ -36,7 +36,7 @@ export const viewHomeRouter = createTRPCRouter({
             return await Promise.all(records.map(async r => {
                 const evidencePaths = r.evidence ? JSON.parse(r.evidence) as string[] : [];
                 const evidenceHrefs = await Promise.all(evidencePaths.map(async (path) => {
-                    return await ctx.s3.presignedGetObject(env.MINIO_BUCKET, path, 24 * 60 * 60); // 24 hours
+                    return await ctx.s3.presignedGetObject(getBucketName(), path, 24 * 60 * 60); // 24 hours
                 }));
                 return {
                     ...r,
