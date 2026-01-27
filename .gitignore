@@ -21,6 +21,7 @@ dev.db-journal
 /.next/
 /out/
 next-env.d.ts
+/.open-next/
 
 # production
 /build

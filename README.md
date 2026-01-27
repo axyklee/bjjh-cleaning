@@ -3,6 +3,14 @@
 
 A cleaning area evaluation system for Hamjiang Experimental High School.
 
+## Tech Stack
+
+- **Framework**: Next.js 15.5.9 with React 19
+- **Database**: Drizzle ORM with SQLite/D1
+- **Authentication**: NextAuth with Google OAuth
+- **Storage**: Cloudflare R2 or MinIO (S3-compatible)
+- **Deployment**: Cloudflare Pages + Workers (via OpenNext.js)
+
 ## Deployment Options
 
 This application can be deployed in multiple ways:
@@ -10,8 +18,8 @@ This application can be deployed in multiple ways:
 ### 1. Cloudflare Pages with Workers and D1 (Recommended for Production)
 
 This deployment method uses Cloudflare's serverless infrastructure:
-- **Cloudflare Pages** for hosting the Next.js application
-- **Cloudflare D1** for the SQLite database
+- **Cloudflare Pages** for hosting the Next.js application via OpenNext.js
+- **Cloudflare D1** for the SQLite database via Drizzle ORM
 - **Cloudflare R2** for file storage
 - **Cloudflare Workers** for server-side logic
 
@@ -36,12 +44,15 @@ This deployment method uses Cloudflare's serverless infrastructure:
    ```bash
    yarn cf:d1:create
    ```
-   Copy the `database_id` from the output and update `wrangler.toml`:
-   ```toml
-   [[d1_databases]]
-   binding = "DB"
-   database_name = "bjjh-cleaning-db"
-   database_id = "YOUR_DATABASE_ID_HERE"
+   Copy the `database_id` from the output and update `wrangler.jsonc`:
+   ```jsonc
+   "d1_databases": [
+     {
+       "binding": "DB",
+       "database_name": "bjjh-cleaning-db",
+       "database_id": "YOUR_DATABASE_ID_HERE"
+     }
+   ]
    ```
 
 4. **Create R2 Bucket**
@@ -49,25 +60,23 @@ This deployment method uses Cloudflare's serverless infrastructure:
    yarn cf:r2:create
    ```
 
-5. **Generate Prisma schema for D1**
+5. **Generate Drizzle schema and migrations**
    ```bash
-   DATABASE_URL="file:./dev.db" yarn prisma generate
+   # Generate migrations
+   yarn db:generate
    ```
 
 6. **Run database migrations**
    
-   First, create a local SQLite database with the schema:
+   Push schema to local database for testing:
    ```bash
-   DATABASE_URL="file:./dev.db" yarn prisma db push
+   DATABASE_URL="file:./dev.db" yarn db:push
    ```
    
    Then apply migrations to D1:
    ```bash
-   # Generate migration SQL from your schema
-   yarn prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > migrations/init.sql
-   
-   # Apply to D1
-   npx wrangler d1 execute bjjh-cleaning-db --file=./migrations/init.sql
+   # Apply to remote D1 database
+   yarn cf:d1:migrate
    ```
 
 7. **Set environment secrets**
@@ -107,7 +116,7 @@ For traditional Docker-based deployment, see the `Dockerfile` and `docker-compos
 
 See `.env.example` for all required environment variables. Key variables:
 
-- `DATABASE_URL`: Database connection string (PostgreSQL URL or `file:./dev.db` for local D1)
+- `DATABASE_URL`: Database connection string (`file:./dev.db` for local SQLite)
 - `AUTH_SECRET`: Secret for NextAuth.js
 - `AUTH_GOOGLE_CLIENT_ID` / `AUTH_GOOGLE_CLIENT_SECRET`: Google OAuth credentials
 - `R2_PUBLIC_URL`: (Optional) Custom domain for R2 public URLs
@@ -118,8 +127,8 @@ See `.env.example` for all required environment variables. Key variables:
 # Install dependencies
 yarn install
 
-# Run development server
-yarn dev
+# Run development server (uses local SQLite)
+DATABASE_URL="file:./dev.db" yarn dev
 
 # Run linter
 yarn lint
@@ -134,15 +143,15 @@ yarn format:write
 ## Database Management
 
 ```bash
-# Generate Prisma client
-yarn prisma generate
-
-# Create migration
+# Generate Drizzle migrations
 yarn db:generate
 
-# Apply migrations
-yarn db:migrate
+# Push schema to database (local development)
+DATABASE_URL="file:./dev.db" yarn db:push
 
-# Open Prisma Studio
+# Apply migrations (production)
+yarn cf:d1:migrate
+
+# Open Drizzle Studio
 yarn db:studio
 ```

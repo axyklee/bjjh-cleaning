@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides detailed instructions for deploying the BJJH Cleaning application to Cloudflare Pages with D1 database and R2 storage.
+This guide provides detailed instructions for deploying the BJJH Cleaning application to Cloudflare Pages with D1 database and R2 storage using OpenNext.js and Drizzle ORM.
 
 ## Prerequisites
 
@@ -40,13 +40,16 @@ yarn cf:d1:create
 # wrangler d1 create bjjh-cleaning-db
 ```
 
-**Important**: Copy the `database_id` from the output and update `wrangler.toml`:
+**Important**: Copy the `database_id` from the output and update `wrangler.jsonc`:
 
-```toml
-[[d1_databases]]
-binding = "DB"
-database_name = "bjjh-cleaning-db"
-database_id = "YOUR_DATABASE_ID_HERE"  # Replace with actual ID
+```jsonc
+"d1_databases": [
+  {
+    "binding": "DB",
+    "database_name": "bjjh-cleaning-db",
+    "database_id": "YOUR_DATABASE_ID_HERE"  // Replace with actual ID
+  }
+]
 ```
 
 ### 4. Create R2 Bucket
@@ -59,23 +62,17 @@ yarn cf:r2:create
 
 ### 5. Set Up Database Schema
 
-Since D1 uses SQLite, we need to generate and apply the schema:
+Using Drizzle ORM with D1:
 
 ```bash
-# Generate Prisma client
-DATABASE_URL="file:./dev.db" yarn prisma generate
+# Generate Drizzle migrations
+yarn db:generate
 
-# Create a local SQLite database to test schema
-DATABASE_URL="file:./dev.db" yarn prisma db push
+# Test schema locally
+DATABASE_URL="file:./dev.db" yarn db:push
 
-# Generate SQL migration from schema
-yarn prisma migrate diff \
-  --from-empty \
-  --to-schema-datamodel prisma/schema.prisma \
-  --script > migrations/001_init.sql
-
-# Apply migration to D1 database
-wrangler d1 execute bjjh-cleaning-db --file=./migrations/001_init.sql
+# Apply migrations to D1 database
+yarn cf:d1:migrate
 ```
 
 ### 6. Configure Environment Variables
@@ -128,7 +125,7 @@ yarn pages:deploy
 3. Connect your GitHub repository
 4. Configure build settings:
    - **Build command**: `yarn build && yarn pages:build`
-   - **Build output directory**: `.vercel/output/static`
+   - **Build output directory**: `.open-next/worker`
    - **Environment variables**: Add all required variables from `.env.example`
 
 Cloudflare will automatically deploy on every push to your main branch.
@@ -159,21 +156,23 @@ Visit http://localhost:8788 to test the application.
 
 ## Database Migrations
 
-When you update the Prisma schema:
+When you update the Drizzle schema:
 
-1. Generate new migration SQL:
+1. Generate new migration:
    ```bash
-   npx prisma migrate diff \
-     --from-schema-datasource prisma/schema.prisma \
-     --to-schema-datamodel prisma/schema.prisma \
-     --script > migrations/$(date +%Y%m%d%H%M%S)_update.sql
+   yarn db:generate
    ```
 
-2. Review the generated SQL
+2. Review the generated migration in `drizzle/` directory
 
-3. Apply to D1:
+3. Apply to local database (testing):
    ```bash
-   wrangler d1 execute bjjh-cleaning-db --file=./migrations/YOUR_MIGRATION.sql
+   DATABASE_URL="file:./dev.db" yarn db:push
+   ```
+
+4. Apply to D1 (production):
+   ```bash
+   yarn cf:d1:migrate
    ```
 
 ## R2 Storage Configuration
@@ -235,14 +234,14 @@ To use a custom domain for R2:
 
 ### D1 Database Connection Issues
 
-- Verify `database_id` in `wrangler.toml` matches your D1 database
+- Verify `database_id` in `wrangler.jsonc` matches your D1 database
 - Check that migrations have been applied
-- Ensure binding name `DB` matches in wrangler.toml
+- Ensure binding name `DB` matches in wrangler.jsonc
 
 ### R2 Storage Issues
 
 - Verify R2 bucket exists: `wrangler r2 bucket list`
-- Check bucket binding in wrangler.toml
+- Check bucket binding in wrangler.jsonc
 - Ensure `R2_PUBLIC_URL` is set correctly
 
 ### NextAuth Issues
