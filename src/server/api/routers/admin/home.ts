@@ -66,11 +66,14 @@ export const adminHomeRouter = createTRPCRouter({
             reportId: z.number().min(1),
         }))
         .mutation(async ({ ctx, input }) => {
-            await ctx.db.report.delete({
+            const report = await ctx.db.report.delete({
                 where: {
                     id: input.reportId
                 }
             });
+            if (report.evidence) {
+                await ctx.s3.removeObjects(env.MINIO_BUCKET, JSON.parse(report.evidence as string));
+            }
         }),
     downloadReports: protectedProcedure
         .input(z.object({
