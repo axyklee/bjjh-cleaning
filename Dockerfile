@@ -45,8 +45,8 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=384"
 
 COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/public ./public
