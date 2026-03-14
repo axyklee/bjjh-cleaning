@@ -1,31 +1,29 @@
 services:
   db:
-    image: postgres:latest
+    image: postgres:18
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     ports:
-      - "5432:5432"
-    restart: unless-stopped
+      - "9221:5432" # postgres port
+    restart: no
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - bj-pgdata:/var/lib/postgresql
 
   minio:
     image: minio/minio:latest
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9222:9000" # minio api
+      - "9223:9001" # minio webui console
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-changeme}
-    env_file:
-      - .env
-    restart: unless-stopped
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    restart: no
     command: server /data --console-address ":9001"
     volumes:
-      - minio_data:/data
+      - bj-minio_data:/data
 
 volumes:
-  minio_data:
-  pgdata:
+  bj-minio_data:
+  bj-pgdata:

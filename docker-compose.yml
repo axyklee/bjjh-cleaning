@@ -1,40 +1,40 @@
 services:
   db:
-    image: postgres:latest
+    image: postgres:18
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     restart: unless-stopped
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - bj-pgdata:/var/lib/postgresql
 
-  # Note: Currently production uses Cloudflare R2. Uncomment this section to use MinIO locally.
-  # minio:
-  #   image: minio/minio:latest
-  #   ports:
-  #     - "4001:9000"
-  #   environment:
-  #     MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
-  #     MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-changeme}
-  #   env_file:
-  #     - .env
-  #   restart: unless-stopped
-  #   command: server /data --console-address ":9001"
-  #   volumes:
-  #     - minio_data:/data
+  # If you use another S3-compatible service in production, you can replace this MinIO configuration with the appropriate settings for that service.
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9222:9000"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    env_file:
+      - .env
+    restart: unless-stopped
+    command: server /data
+    volumes:
+      - bj-minio_data:/data
 
   app:
     build: .
     ports:
-      - "4000:3000"
+      - "9220:3000"
     depends_on:
       - db
-      # - minio
+      - minio
     env_file:
       - .env
     restart: unless-stopped
 
 volumes:
-  # minio_data:
-  pgdata:
+  bj-minio_data:
+  bj-pgdata:
