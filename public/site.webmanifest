@@ -1,0 +1,23 @@
+{
+  "short_name": "掃區評比系統",
+  "name": "濱江實中 掃區評比系統",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "background_color": "#fafafa",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#fafafa",
+  "description": "專為學校設計的應用程式，幫助學生和教師更有效率地管理和評比校園掃區。"
+}
