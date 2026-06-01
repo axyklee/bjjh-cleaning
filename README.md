@@ -1,6 +1,14 @@
 # BJJH Cleaning
 ## 濱江實中 掃區評比系統
 
+=======
+## Features
+
+- Sign in with Google with Multiple Administrators
+- Easily perform quality assurance with any checklist items with default suggestions
+- Generate printable sheets to be distributed with a QR code to see images of suggestions
+- Each owner of a task will see their own 
+
 ## Development
 
 1. At `dev/`, Start Postgres and Minio development containers.
