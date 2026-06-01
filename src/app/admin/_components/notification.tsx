@@ -49,7 +49,7 @@ export default function Notification(props: {
         <div className="w-[19cm] relative">
             <Link href={`/view/${date}/${className}`} target="_blank" className="absolute right-0 top-0">
                 <QRCodeSVG
-                    value={`${getBaseUrl()}/view/${date}/${className}${process.env.NEXT_PUBLIC_UMAMI_ID && `?umami_id=${process.env.NEXT_PUBLIC_UMAMI_ID}`}`}
+                    value={`${getBaseUrl()}/view/${date}/${className}?utm_source=qrcode`}
                     onClick={() => `${getBaseUrl()}/view/${date}/${className}`}
                     size={46} className="absolute right-0 top-0" />
             </Link>
