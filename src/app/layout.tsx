@@ -29,7 +29,11 @@ export default function RootLayout({
       </head>
       <body className="bg-neutral-50">
         <TRPCReactProvider>{children}</TRPCReactProvider>
-        <script defer src="https://cloud.umami.is/script.js" data-website-id="de77df28-58bf-43e8-aada-e56af5ff7e44"></script>
+        {
+          process.env.NEXT_PUBLIC_UMAMI_ID && (
+            <script defer src="https://cloud.umami.is/script.js" data-website-id={process.env.NEXT_PUBLIC_UMAMI_ID}></script>
+          )
+        }
       </body>
     </html>
   );

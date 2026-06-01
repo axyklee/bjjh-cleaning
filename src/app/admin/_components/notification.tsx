@@ -8,6 +8,8 @@ import { api } from "~/trpc/react";
 import { QRCodeSVG } from 'qrcode.react';
 import { Trash } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default function Notification(props: {
     className: string;
@@ -45,7 +47,12 @@ export default function Notification(props: {
 
     return <Dialog>
         <div className="w-[19cm] relative">
-            <QRCodeSVG value={`${getBaseUrl()}/view/${date}/${className}`} size={46} className="absolute right-0 top-0" />
+            <Link href={`/view/${date}/${className}`} target="_blank" className="absolute right-0 top-0">
+                <QRCodeSVG
+                    value={`${getBaseUrl()}/view/${date}/${className}${process.env.NEXT_PUBLIC_UMAMI_ID && `?umami_id=${process.env.NEXT_PUBLIC_UMAMI_ID}`}`}
+                    onClick={() => `${getBaseUrl()}/view/${date}/${className}`}
+                    size={46} className="absolute right-0 top-0" />
+            </Link>
             <table className="font-mono notification">
                 <tbody>
                     <tr>
