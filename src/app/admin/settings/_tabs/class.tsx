@@ -36,6 +36,7 @@ export default function ClassTab() {
                         <TableRow>
                             <TableHead>班級</TableHead>
                             <TableHead>列印</TableHead>
+                            <TableHead>掃區數量</TableHead>
                             <TableHead>動作</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -68,6 +69,7 @@ export default function ClassTab() {
                                         }}
                                     />
                                 </TableCell>
+                                <TableCell>{classItem._count.areas}</TableCell>
                                 <TableCell>
                                     <Button variant="destructive" onClick={
                                         async () => {

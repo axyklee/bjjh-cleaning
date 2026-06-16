@@ -9,7 +9,12 @@ export const settingsRouter = createTRPCRouter({
             select: {
                 id: true,
                 name: true,
-                printEnabled: true
+                printEnabled: true,
+                _count: {
+                    select: {
+                        areas: true
+                    }
+                }
             },
             orderBy: [
                 { printEnabled: "desc" },
