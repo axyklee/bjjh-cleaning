@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from 'date-fns';
-import { CalendarIcon, Check, CircleQuestionMark, Download, HomeIcon, Printer } from 'lucide-react';
+import { CalendarIcon, Check, CircleQuestionMark, Download, HomeIcon, Printer, PrinterX } from 'lucide-react';
 import { useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion';
 import { Button } from '~/components/ui/button';
@@ -130,6 +130,7 @@ const AdminPage = () => {
                                     <AccordionTrigger>
                                         <div className='font-mono'>
                                             {c.name}
+                                            {!c.printEnabled && <Badge variant="secondary" className="ml-2 bg-gray-300"><PrinterX /></Badge>}
                                             {c.reports.length > 0 ? <Badge variant="secondary" className="ml-2 bg-yellow-500">{c.reports.length}</Badge> :
                                                 <Badge variant="secondary" className="ml-2 bg-green-500"><Check /></Badge>}
                                         </div>

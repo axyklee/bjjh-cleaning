@@ -31,7 +31,7 @@ export default function PrintablePage() {
   }, [reports.isSuccess]);
 
   return (<div className="bg-white">{
-    reports.data?.map((c) => (
+    reports.data?.filter((c) => c.printEnabled).map((c) => (
       <div key={c.id} className="mb-[1.5cm]!">
         <Notification announcements={announcements.data?.map(c => c.content) ?? []} className={c.name} date={reports.data ? format(date, "yyyy-MM-dd") : ""} time={format(
           c.reports.length > 0 ? new Date(c.reports[0]!.createdAt) : new Date()

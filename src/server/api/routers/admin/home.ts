@@ -11,12 +11,14 @@ export const adminHomeRouter = createTRPCRouter({
         }))
         .query(async ({ ctx, input }) => {
             const classes = await ctx.db.class.findMany({
-                orderBy: {
-                    id: "asc"
-                },
+                orderBy: [
+                    { printEnabled: "desc" },
+                    { name: "asc" }
+                ],
                 select: {
                     id: true,
-                    name: true
+                    name: true,
+                    printEnabled: true
                 }
             });
             const ret =
@@ -105,7 +107,8 @@ export const adminHomeRouter = createTRPCRouter({
                     id: true
                 },
                 orderBy: [
-                    { area: { class: { id: "asc" } } },
+                    { area: { class: { printEnabled: "desc" } } },
+                    { area: { class: { name: "asc" } } },
                     { area: { rank: "asc" } }
                 ]
             });

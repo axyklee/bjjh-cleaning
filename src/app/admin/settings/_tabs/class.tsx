@@ -2,6 +2,7 @@
 
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
+import { Switch } from "~/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { EditableCell } from "~/components/ui/editable-cell";
 import { api } from "~/trpc/react";
@@ -34,6 +35,7 @@ export default function ClassTab() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>班級</TableHead>
+                            <TableHead>列印</TableHead>
                             <TableHead>動作</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -46,7 +48,21 @@ export default function ClassTab() {
                                         onSave={async (newName) => {
                                             await updateClass.mutateAsync({
                                                 id: classItem.id,
-                                                name: newName
+                                                name: newName,
+                                                printEnabled: classItem.printEnabled,
+                                            });
+                                            await queryClient.invalidateQueries();
+                                        }}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <Switch
+                                        checked={classItem.printEnabled}
+                                        onCheckedChange={async (checked) => {
+                                            await updateClass.mutateAsync({
+                                                id: classItem.id,
+                                                name: classItem.name,
+                                                printEnabled: checked
                                             });
                                             await queryClient.invalidateQueries();
                                         }}

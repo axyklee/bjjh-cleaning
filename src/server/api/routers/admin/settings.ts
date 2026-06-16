@@ -8,8 +8,13 @@ export const settingsRouter = createTRPCRouter({
         return ctx.db.class.findMany({
             select: {
                 id: true,
-                name: true
-            }
+                name: true,
+                printEnabled: true
+            },
+            orderBy: [
+                { printEnabled: "desc" },
+                { name: "asc" }
+            ]
         });
     }),
     classCreate: protectedProcedure
@@ -39,6 +44,7 @@ export const settingsRouter = createTRPCRouter({
                 },
                 data: {
                     name: input.name,
+                    printEnabled: input.printEnabled,
                 },
             });
         }),

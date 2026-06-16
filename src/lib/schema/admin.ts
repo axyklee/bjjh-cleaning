@@ -7,6 +7,7 @@ export const classCreateSchema = z.object({
 export const classUpdateSchema = z.object({
     id: z.number().int(),
     name: z.string().min(1, "請輸入班級名稱"),
+    printEnabled: z.boolean(),
 })
 
 export const areaCreateSchema = z.object({
