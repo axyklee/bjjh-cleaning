@@ -19,6 +19,38 @@ import { getLastWorkday } from "~/lib/utils";
 import { format } from "date-fns";
 import imageCompression, { type Options } from 'browser-image-compression';
 
+// Upload a file to a presigned URL with a timeout and a couple of retries.
+async function uploadWithRetry(url: string, file: Blob, retries = 2): Promise<void> {
+    for (let attempt = 0; ; attempt++) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60_000); // 60s per attempt
+        try {
+            const res = await fetch(url, {
+                method: "PUT",
+                body: file,
+                // Use the real MIME type so the object is stored correctly.
+                headers: {
+                    "Content-Type": file.type || "application/octet-stream",
+                },
+                signal: controller.signal,
+            });
+            if (!res.ok) {
+                const detail = await res.text().catch(() => "");
+                throw new Error(`上傳失敗 (${res.status}) ${detail}`.trim());
+            }
+            return;
+        } catch (err) {
+            // Retry only network-level failures, not HTTP errors we threw above.
+            const isNetworkError = err instanceof DOMException || (err instanceof TypeError);
+            if (attempt >= retries || !isNetworkError) {
+                throw err;
+            }
+        } finally {
+            clearTimeout(timeout);
+        }
+    }
+}
+
 export default function EvaluatePage() {
     const areas = api.admin.settings.areaGetAll.useQuery(undefined, {
         refetchOnWindowFocus: false,
@@ -130,15 +162,9 @@ export default function EvaluatePage() {
 
                             setFileUploadMsg("上傳檔案中...");
 
-                            await fetch(
+                            await uploadWithRetry(
                                 uploadUrl.data?.url ?? "",
-                                {
-                                    method: "PUT",
-                                    body: compressedFile,
-                                    headers: {
-                                        "Content-Type": "image/*",
-                                    },
-                                }
+                                compressedFile,
                             );
 
                             setFileUploadProgress(80); // 80% after upload
