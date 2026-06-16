@@ -18,6 +18,7 @@ export default function PrintablePage() {
   });
   const reports = api.admin.home.getReportsSortedByClass.useQuery({
     date: date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+    printOnly: true,
     interleaved,
   }, {
     enabled: !!date,

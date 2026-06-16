@@ -7,10 +7,14 @@ export const adminHomeRouter = createTRPCRouter({
     getReportsSortedByClass: protectedProcedure
         .input(z.object({
             date: z.string().min(1, "請輸入日期").regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式錯誤，請使用 YYYY-MM-DD"),
+            printOnly: z.boolean().optional(),
             interleaved: z.boolean().optional(),
         }))
         .query(async ({ ctx, input }) => {
             const classes = await ctx.db.class.findMany({
+                where: {
+                    printEnabled: input.printOnly ? true : undefined
+                },
                 orderBy: [
                     { printEnabled: "desc" },
                     { name: "asc" }
