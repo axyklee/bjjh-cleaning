@@ -114,3 +114,12 @@ model Report {
 
     @@index([text])
 }
+
+model Announcement {
+    id        Int      @id @default(autoincrement())
+    content      String
+    rank      Int      @unique // Lower number shows up on top
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

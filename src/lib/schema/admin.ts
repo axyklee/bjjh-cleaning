@@ -62,3 +62,12 @@ export const evaluateReportSchema = z.object({
     }),
     comment: z.string().optional(),
 });
+
+export const announcementCreateSchema = z.object({
+    content: z.string().min(1, "請輸入公告訊息"),
+});
+
+export const announcementUpdateSchema = z.object({
+    id: z.number().int(),
+    content: z.string().min(1, "請輸入公告訊息"),
+})

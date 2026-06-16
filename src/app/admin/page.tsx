@@ -24,6 +24,7 @@ const AdminPage = () => {
         enabled: !!date,
         refetchOnWindowFocus: false,
     });
+    const announcements = api.admin.settings.announcementGetAll.useQuery();
     const downloadReports = api.admin.home.downloadReports.useMutation();
     const [downloadStatus, setDownloadStatus] = useState(0);
 
@@ -136,6 +137,7 @@ const AdminPage = () => {
                                     <AccordionContent className="w-full flex items-center justify-center">
                                         <div className="overflow-x-auto">
                                             <Notification className={c.name} date={reports.data ? format(date, "yyyy-MM-dd") : ""}
+                                                announcements={announcements.data?.map(c => c.content) ?? []}
                                                 showDelete={true}
                                                 time={format(c.reports.length > 0 ? new Date(c.reports[0]!.createdAt) :
                                                     new Date(), "HH:mm")} reports={c.reports} />

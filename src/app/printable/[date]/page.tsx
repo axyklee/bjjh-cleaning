@@ -13,6 +13,9 @@ export default function PrintablePage() {
   const searchParams = useSearchParams();
   const interleaved = searchParams.get("interleaved") === "true";
 
+  const announcements = api.admin.settings.announcementGetAll.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  });
   const reports = api.admin.home.getReportsSortedByClass.useQuery({
     date: date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
     interleaved,
@@ -30,7 +33,7 @@ export default function PrintablePage() {
   return (<div className="bg-white">{
     reports.data?.map((c) => (
       <div key={c.id} className="mb-[1.5cm]!">
-        <Notification className={c.name} date={reports.data ? format(date, "yyyy-MM-dd") : ""} time={format(
+        <Notification announcements={announcements.data?.map(c => c.content) ?? []} className={c.name} date={reports.data ? format(date, "yyyy-MM-dd") : ""} time={format(
           c.reports.length > 0 ? new Date(c.reports[0]!.createdAt) : new Date()
           , "HH:mm")} reports={c.reports} />
       </div>

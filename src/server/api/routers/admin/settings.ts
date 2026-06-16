@@ -1,6 +1,6 @@
 import z from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
-import { accountCreateSchema, areaCreateSchema, classCreateSchema, defaultCreateSchema, classUpdateSchema, areaUpdateSchema, defaultUpdateSchema } from "~/lib/schema/admin";
+import { accountCreateSchema, announcementCreateSchema, announcementUpdateSchema, areaCreateSchema, classCreateSchema, defaultCreateSchema, classUpdateSchema, areaUpdateSchema, defaultUpdateSchema } from "~/lib/schema/admin";
 import { env } from "~/env";
 
 export const settingsRouter = createTRPCRouter({
@@ -352,5 +352,139 @@ export const settingsRouter = createTRPCRouter({
                     id: input,
                 }
             });
-        })
+        }),
+    announcementGetAll: protectedProcedure
+        .query(async ({ ctx }) => {
+            return ctx.db.announcement.findMany({
+                select: {
+                    id: true,
+                    content: true,
+                },
+                orderBy: {
+                    rank: "asc"
+                }
+            });
+        }),
+    announcementCreate: protectedProcedure
+        .input(announcementCreateSchema)
+        .mutation(async ({ ctx, input }) => {
+            const lastAnnouncement = await ctx.db.announcement.findFirst({
+                select: {
+                    rank: true
+                },
+                orderBy: {
+                    rank: "desc"
+                }
+            });
+            const newRank = lastAnnouncement ? lastAnnouncement.rank + 1 : 1;
+            return ctx.db.announcement.create({
+                data: {
+                    content: input.content,
+                    rank: newRank
+                }
+            });
+        }),
+    announcementUpdate: protectedProcedure
+        .input(announcementUpdateSchema)
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.announcement.update({
+                where: {
+                    id: input.id,
+                },
+                data: {
+                    content: input.content,
+                }
+            });
+        }),
+    announcementDelete: protectedProcedure
+        .input(z.number().int())
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.announcement.delete({
+                where: {
+                    id: input,
+                }
+            });
+        }),
+    announcementMoveUp: protectedProcedure
+        .input(z.number().int())
+        .mutation(async ({ ctx, input }) => {
+            const announcement = await ctx.db.announcement.findUnique({
+                select: {
+                    rank: true,
+                    id: true
+                },
+                where: { id: input }
+            });
+            if (!announcement) throw new Error("Announcement not found");
+            const upperAnnouncement = await ctx.db.announcement.findFirst({
+                select: {
+                    id: true,
+                    rank: true
+                },
+                where: {
+                    rank: {
+                        lt: announcement.rank
+                    }
+                },
+                orderBy: {
+                    rank: "desc"
+                }
+            });
+            if (!upperAnnouncement) throw new Error("已經在最上方");
+            await ctx.db.$transaction([
+                ctx.db.announcement.update({
+                    where: { id: announcement.id },
+                    data: { rank: -1 }
+                }),
+                ctx.db.announcement.update({
+                    where: { id: upperAnnouncement.id },
+                    data: { rank: announcement.rank }
+                }),
+                ctx.db.announcement.update({
+                    where: { id: announcement.id },
+                    data: { rank: upperAnnouncement.rank }
+                })
+            ]);
+        }),
+    announcementMoveDown: protectedProcedure
+        .input(z.number().int())
+        .mutation(async ({ ctx, input }) => {
+            const announcement = await ctx.db.announcement.findUnique({
+                select: {
+                    rank: true,
+                    id: true
+                },
+                where: { id: input }
+            });
+            if (!announcement) throw new Error("Announcement not found");
+            const lowerAnnouncement = await ctx.db.announcement.findFirst({
+                select: {
+                    id: true,
+                    rank: true
+                },
+                where: {
+                    rank: {
+                        gt: announcement.rank
+                    }
+                },
+                orderBy: {
+                    rank: "asc"
+                }
+            });
+            if (!lowerAnnouncement) throw new Error("已經在最下方");
+            await ctx.db.$transaction([
+                ctx.db.announcement.update({
+                    where: { id: lowerAnnouncement.id },
+                    data: { rank: -1 }
+                }),
+                ctx.db.announcement.update({
+                    where: { id: announcement.id },
+                    data: { rank: lowerAnnouncement.rank }
+                }),
+                ctx.db.announcement.update({
+                    where: { id: lowerAnnouncement.id },
+                    data: { rank: announcement.rank }
+                })
+            ]);
+        }),
 });

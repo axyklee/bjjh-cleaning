@@ -4,6 +4,7 @@ import ClassTab from "./_tabs/class";
 import AreaTab from "./_tabs/area";
 import DefaultTab from "./_tabs/default";
 import AccountTab from "./_tabs/account";
+import AnnouncementTab from "./_tabs/announcement";
 
 export default function SettingsPage() {
     return (<div>
@@ -14,11 +15,13 @@ export default function SettingsPage() {
                 <TabsTrigger value="area">掃區</TabsTrigger>
                 <TabsTrigger value="default">預設髒亂情況</TabsTrigger>
                 <TabsTrigger value="account">管理員帳號</TabsTrigger>
+                <TabsTrigger value="announcement">公告</TabsTrigger>
             </TabsList>
             <TabsContent value="class"><ClassTab /></TabsContent>
             <TabsContent value="area"><AreaTab /></TabsContent>
             <TabsContent value="default"><DefaultTab /></TabsContent>
             <TabsContent value="account"><AccountTab /></TabsContent>
+            <TabsContent value="announcement"><AnnouncementTab /></TabsContent>
         </Tabs>
 
     </div>);

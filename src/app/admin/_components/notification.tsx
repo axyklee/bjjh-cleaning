@@ -12,6 +12,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export default function Notification(props: {
+    announcements: string[];
     className: string;
     date: string;
     time: string;
@@ -27,7 +28,7 @@ export default function Notification(props: {
         comment: string | null;
     })[]
 }) {
-    const { className, date, time, reports, showDelete } = props;
+    const { announcements, className, date, time, reports, showDelete } = props;
     const [selectedEvidencePaths, setSelectedEvidencePaths] = useState<string[]>([]);
     const queryClient = useQueryClient();
 
@@ -44,6 +45,8 @@ export default function Notification(props: {
         }
         return '';
     }
+
+    const expectedFillers = Math.max(9 - Math.max(reports.length, 1) - announcements.length, 0);
 
     return <Dialog>
         <div className="w-[19cm] relative">
@@ -113,16 +116,21 @@ export default function Notification(props: {
                         )) : <tr><td className="text-start!" colSpan={12}>今日打掃良好，謝謝老師同學們的辛勞，請繼續保持 :)</td></tr>
                     }
                     {
-                        reports.length > 0 &&
-                            reports.length < 9 ? Array.from({ length: 9 - reports.length }).map((_, index) => (
+                        expectedFillers > 0 &&
+                            Array.from({ length: expectedFillers }).map((_, index) => (
                                 <tr key={index}>
                                     <td colSpan={12}>&nbsp;</td>
                                 </tr>
-                            )) : reports.length === 0 ? Array.from({ length: 8 }).map((_, index) => (
-                                <tr key={index}>
-                                    <td colSpan={12}>&nbsp;</td>
-                                </tr>
-                            )) : null
+                            ))
+                    }
+                    {
+                        announcements.map((a, index) => (
+                            <tr key={index}>
+                                <td colSpan={12} className="text-center! font-bold!">
+                                    公告: {a}
+                                </td>
+                            </tr>
+                        ))
                     }
                     <tr>
                         <td colSpan={8} className="footer-left">敬會導師協助督導 / 歡迎使用上方 QR Code 查看照片</td>
